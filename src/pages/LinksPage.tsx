@@ -80,7 +80,8 @@ export function LinksPage() {
   };
 
   const copyVariantToClipboard = (linkId: string, source: string) => {
-    const url = getApiUrl(linkId, links.find(l => l.id === linkId)?.slug || '', source);
+    const slug = links.find(l => l.id === linkId)?.slug || '';
+    const url = getPublicUrl(slug, source);
     navigator.clipboard.writeText(url);
     setCopiedVariant(`${linkId}-${source}`);
     setTimeout(() => setCopiedVariant(null), 1500);
@@ -99,7 +100,10 @@ export function LinksPage() {
 
   const getPublicUrl = (slug: string, source?: string): string => {
     const baseUrl = `${PUBLIC_BASE_URL}/${user?.username}/${slug}`;
-    return source ? `${baseUrl}/${source}` : baseUrl;
+    if (source) {
+      return `${baseUrl}?source=${source}`;
+    }
+    return baseUrl;
   };
 
   const getApiUrl = (linkId: string, slug: string, source?: string): string => {

@@ -238,21 +238,21 @@ export function NewLinkPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Public Link (Coming Soon)
+                  Public Link (Live)
                 </label>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 min-w-0 px-4 py-3 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-600 font-mono break-all">
+                  <div className="flex-1 min-w-0 px-4 py-3 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-400 font-mono break-all">
                     go.tubelinkr.com/{user?.username}/{createdLink.slug}
                   </div>
                   <button
                     onClick={() => copyToClipboard('public', `go.tubelinkr.com/${user?.username}/${createdLink.slug}`)}
-                    className="px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors flex-shrink-0"
+                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex-shrink-0"
                   >
                     {copiedLink === 'public' ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
                 <p className="mt-2 text-xs text-gray-500">
-                  This branded URL will be available soon
+                  Share this branded URL anywhere
                 </p>
               </div>
             </div>

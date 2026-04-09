@@ -257,20 +257,26 @@ async function handleRedirectAPI(request, env, corsHeaders) {
     const source = url.searchParams.get('source');
     const normalizedSource = source ? source.toLowerCase().trim() : null;
     
+    console.log('Click tracking attempt:', { linkId: link.id, source: normalizedSource });
+    
     // Record click event
     const now = new Date().toISOString();
     const referrer = request.headers.get('referer') || null;
     const userAgent = request.headers.get('user-agent') || null;
     const ipHash = request.headers.get('cf-connecting-ip') || null;
     
+    console.log('Click data:', { linkId: link.id, timestamp: now, referrer, userAgent, ipHash, source: normalizedSource });
+    
     try {
+      console.log('Attempting click insert...');
       await env.DB.prepare(
         `INSERT INTO click_events (link_id, timestamp, referrer, user_agent, ip_hash, source) 
          VALUES (?, ?, ?, ?, ?, ?)`
       ).bind(link.id, now, referrer, userAgent, ipHash, normalizedSource).run();
-      console.log('Click event recorded:', { linkId: link.id, source: normalizedSource });
+      console.log('Click event recorded successfully:', { linkId: link.id, source: normalizedSource });
     } catch (clickError) {
       console.error('Failed to record click:', clickError);
+      console.error('Click error details:', clickError.message, clickError.stack);
       // Continue with redirect even if click recording fails
     }
     

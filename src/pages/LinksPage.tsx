@@ -160,31 +160,31 @@ export function LinksPage() {
                       <div className="text-sm text-gray-500 mb-3">Track this link in different placements:</div>
                       <div className="flex flex-wrap gap-2">
                         <button
-                          onClick={() => copyToClipboard(link.id + '-d', `${user?.username}/${link.slug}/d`)}
+                          onClick={() => copyToClipboard(link.id + '-d', `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=d`)}
                           className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
                         >
                           Description
                         </button>
                         <button
-                          onClick={() => copyToClipboard(link.id + '-p', `${user?.username}/${link.slug}/p`)}
+                          onClick={() => copyToClipboard(link.id + '-p', `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=p`)}
                           className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
                         >
                           Pinned
                         </button>
                         <button
-                          onClick={() => copyToClipboard(link.id + '-b', `${user?.username}/${link.slug}/b`)}
+                          onClick={() => copyToClipboard(link.id + '-b', `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=b`)}
                           className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
                         >
                           Bio
                         </button>
                         <button
-                          onClick={() => copyToClipboard(link.id + '-s1', `${user?.username}/${link.slug}/s1`)}
+                          onClick={() => copyToClipboard(link.id + '-s1', `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=s1`)}
                           className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
                         >
                           Short 1
                         </button>
                         <button
-                          onClick={() => copyToClipboard(link.id + '-v1', `${user?.username}/${link.slug}/v1`)}
+                          onClick={() => copyToClipboard(link.id + '-v1', `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=v1`)}
                           className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
                         >
                           Video 1
@@ -199,7 +199,7 @@ export function LinksPage() {
                             if (e.key === 'Enter') {
                               const customCode = e.currentTarget.value.trim().toLowerCase();
                               if (customCode) {
-                                copyToClipboard(link.id + '-' + customCode, `${user?.username}/${link.slug}/${customCode}`);
+                                copyToClipboard(link.id + '-' + customCode, `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=${customCode}`);
                                 e.currentTarget.value = '';
                               }
                             }

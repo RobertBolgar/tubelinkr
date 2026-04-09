@@ -25,6 +25,10 @@ export async function onRequest(context) {
       return new Response('Link not found', { status: 404 });
     }
     
+    // Get source from query parameter
+    const source = url.searchParams.get('source');
+    const normalizedSource = source ? source.toLowerCase().trim() : null;
+    
     // Record click event
     const now = new Date().toISOString();
     const referrer = request.headers.get('referer') || null;
@@ -35,8 +39,8 @@ export async function onRequest(context) {
       await env.DB.prepare(
         `INSERT INTO click_events (link_id, timestamp, referrer, user_agent, ip_hash, source) 
          VALUES (?, ?, ?, ?, ?, ?)`
-      ).bind(link.id, now, referrer, userAgent, ipHash, 'redirect').run();
-      console.log('Click event recorded for link:', link.id);
+      ).bind(link.id, now, referrer, userAgent, ipHash, normalizedSource).run();
+      console.log('Click event recorded:', { linkId: link.id, source: normalizedSource });
     } catch (clickError) {
       console.error('Failed to record click:', clickError);
       // Continue with redirect even if click recording fails

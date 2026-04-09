@@ -209,7 +209,7 @@ export function DashboardPage() {
                 <TrendingUp className="w-5 h-5 text-green-500" />
                 <h2 className="text-lg font-bold text-white">Overall Performance</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-6">
                 <div>
                   <div className="text-sm text-gray-500 mb-2">Source Breakdown</div>
                   <div className="space-y-2">
@@ -226,7 +226,7 @@ export function DashboardPage() {
                     })}
                   </div>
                 </div>
-                <div>
+                <div className="text-center">
                   <div className="text-xs text-gray-500 mb-1">💡 Insight</div>
                   <div className="text-white font-medium">
                     {topSourceLabel} is your top performing placement

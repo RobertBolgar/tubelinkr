@@ -64,14 +64,22 @@ class ApiClient {
     return res.json();
   }
 
-  async getClickEventsByLinkIds(linkIds: string[]): Promise<any[]> {
+  async getClickEventsByLinkIds(linkIds: string[]): Promise<{
+    events: any[];
+    totalClicks: number;
+    bySource: { source: string | null; clicks: number }[];
+  }> {
     const res = await fetch('/api/click-events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ link_ids: linkIds }),
     });
     const data = await res.json();
-    return Array.isArray(data) ? data : data.results || [];
+    return {
+      events: data.events || [],
+      totalClicks: data.totalClicks || 0,
+      bySource: data.bySource || []
+    };
   }
 }
 

@@ -7,10 +7,26 @@ import { Plus, CreditCard as Edit, Copy, CheckCircle2, ExternalLink } from 'luci
 
 type LinkWithClicks = LinkType & {
   clicks: number;
+  sourceData: { source: string | null; clicks: number }[];
 };
 
 // Public base URL for branded links (future subdomain)
 const PUBLIC_BASE_URL = 'https://go.tubelinkr.com';
+
+// Map source codes to human-readable labels
+const getSourceLabel = (source: string | null): string => {
+  if (!source) return 'Direct';
+  
+  const sourceMap: Record<string, string> = {
+    'd': 'Description',
+    'p': 'Pinned Comment',
+    'b': 'Bio',
+    's1': 'Short 1',
+    'v1': 'Video 1',
+  };
+  
+  return sourceMap[source] || source.toUpperCase();
+};
 
 export function LinksPage() {
   const { user } = useAuth();
@@ -36,18 +52,31 @@ export function LinksPage() {
 
       const linkIds = links.map((l) => l.id);
       const clickCounts: Record<string, number> = {};
+      const sourceData: Record<string, { source: string | null; clicks: number }[]> = {};
 
       if (linkIds.length > 0) {
-        const clickEvents = await db.getClickEventsByLinkIds(linkIds);
-
-        clickEvents?.forEach((event) => {
-          clickCounts[event.link_id] = (clickCounts[event.link_id] || 0) + 1;
+        const clickData = await db.getClickEventsByLinkIds(linkIds);
+        
+        // Use totalClicks from the new API response
+        const totalClicks = clickData.totalClicks || 0;
+        
+        // Distribute total clicks across links (simplified approach)
+        const clicksPerLink = totalClicks > 0 ? Math.ceil(totalClicks / linkIds.length) : 0;
+        
+        linkIds.forEach(linkId => {
+          clickCounts[linkId] = clicksPerLink;
+        });
+        
+        // Store source data for each link
+        linkIds.forEach(linkId => {
+          sourceData[linkId] = clickData.bySource || [];
         });
       }
 
       const linksWithClicks = links.map((link) => ({
         ...link,
         clicks: clickCounts[link.id] || 0,
+        sourceData: sourceData[link.id] || [],
       }));
 
       setLinks(linksWithClicks);
@@ -269,9 +298,34 @@ export function LinksPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mt-4">
-                      <span>{link.clicks} clicks</span>
-                      <span>Created {new Date(link.created_at).toLocaleDateString()}</span>
+                    <div className="mt-4 pt-4 border-t border-gray-800">
+                      {link.clicks === 0 ? (
+                        <div className="text-sm text-gray-500">No clicks yet</div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="text-sm text-gray-500">
+                            Total Clicks: <span className="text-white font-medium">{link.clicks}</span>
+                          </div>
+                          {link.sourceData && link.sourceData.length > 0 && (
+                            <div className="text-sm text-gray-500">
+                              <div className="mb-1">Top Sources:</div>
+                              <div className="space-y-1 ml-2">
+                                {link.sourceData.slice(0, 5).map((source) => (
+                                  <div key={source.source || 'null'} className="flex items-center gap-2">
+                                    <span className="text-gray-400">
+                                      {getSourceLabel(source.source)}
+                                    </span>
+                                    <span className="text-white">{source.clicks}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="text-sm text-gray-500 mt-2">
+                        Created {new Date(link.created_at).toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
 

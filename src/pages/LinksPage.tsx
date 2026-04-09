@@ -9,11 +9,15 @@ type LinkWithClicks = LinkType & {
   clicks: number;
 };
 
+// Public base URL for branded links
+const PUBLIC_BASE_URL = 'https://tubelinkr.com';
+
 export function LinksPage() {
   const { user } = useAuth();
   const [links, setLinks] = useState<LinkWithClicks[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [selectedSources, setSelectedSources] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchLinks();
@@ -58,6 +62,23 @@ export function LinksPage() {
     navigator.clipboard.writeText(url);
     setCopiedId(linkId);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const getPublicUrl = (linkId: string, slug: string, source?: string): string => {
+    const baseUrl = `${PUBLIC_BASE_URL}/${user?.username}/${slug}`;
+    return source ? `${baseUrl}/${source}` : baseUrl;
+  };
+
+  const selectSource = (linkId: string, source: string) => {
+    setSelectedSources(prev => ({ ...prev, [linkId]: source }));
+  };
+
+  const clearSource = (linkId: string) => {
+    setSelectedSources(prev => {
+      const newSources = { ...prev };
+      delete newSources[linkId];
+      return newSources;
+    });
   };
 
   const toggleLinkStatus = async (linkId: string, currentStatus: boolean) => {
@@ -127,10 +148,10 @@ export function LinksPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-500">Public URL:</span>
                         <div className="text-sm text-gray-500 font-mono">
-                          {window.location.origin}/api/redirect/{link.id}/{link.slug}
+                          {getPublicUrl(link.id, link.slug, selectedSources[link.id])}
                         </div>
                         <button
-                          onClick={() => copyToClipboard(link.id, `${window.location.origin}/api/redirect/${link.id}/${link.slug}`)}
+                          onClick={() => copyToClipboard(link.id, getPublicUrl(link.id, link.slug, selectedSources[link.id]))}
                           className="text-gray-400 hover:text-white transition-colors"
                         >
                           {copiedId === link.id ? (
@@ -159,35 +180,63 @@ export function LinksPage() {
                       <div className="text-sm text-gray-500 mb-3">Track this link in different placements:</div>
                       <div className="flex flex-wrap gap-2">
                         <button
-                          onClick={() => copyToClipboard(link.id + '-d', `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=d`)}
-                          className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                          onClick={() => selectSource(link.id, 'd')}
+                          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                            selectedSources[link.id] === 'd'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                          }`}
                         >
                           Description
                         </button>
                         <button
-                          onClick={() => copyToClipboard(link.id + '-p', `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=p`)}
-                          className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                          onClick={() => selectSource(link.id, 'p')}
+                          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                            selectedSources[link.id] === 'p'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                          }`}
                         >
                           Pinned
                         </button>
                         <button
-                          onClick={() => copyToClipboard(link.id + '-b', `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=b`)}
-                          className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                          onClick={() => selectSource(link.id, 'b')}
+                          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                            selectedSources[link.id] === 'b'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                          }`}
                         >
                           Bio
                         </button>
                         <button
-                          onClick={() => copyToClipboard(link.id + '-s1', `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=s1`)}
-                          className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                          onClick={() => selectSource(link.id, 's1')}
+                          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                            selectedSources[link.id] === 's1'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                          }`}
                         >
                           Short 1
                         </button>
                         <button
-                          onClick={() => copyToClipboard(link.id + '-v1', `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=v1`)}
-                          className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                          onClick={() => selectSource(link.id, 'v1')}
+                          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                            selectedSources[link.id] === 'v1'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                          }`}
                         >
                           Video 1
                         </button>
+                        {selectedSources[link.id] && (
+                          <button
+                            onClick={() => clearSource(link.id)}
+                            className="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+                          >
+                            Clear
+                          </button>
+                        )}
                       </div>
                       <div className="mt-3 flex items-center gap-2">
                         <input
@@ -198,13 +247,13 @@ export function LinksPage() {
                             if (e.key === 'Enter') {
                               const customCode = e.currentTarget.value.trim().toLowerCase();
                               if (customCode) {
-                                copyToClipboard(link.id + '-' + customCode, `${window.location.origin}/api/redirect/${link.id}/${link.slug}?source=${customCode}`);
+                                selectSource(link.id, customCode);
                                 e.currentTarget.value = '';
                               }
                             }
                           }}
                         />
-                        <span className="text-xs text-gray-500">Press Enter to copy custom variant</span>
+                        <span className="text-xs text-gray-500">Press Enter to add custom variant</span>
                       </div>
                     </div>
 

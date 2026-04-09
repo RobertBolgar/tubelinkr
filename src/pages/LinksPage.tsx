@@ -54,8 +54,7 @@ export function LinksPage() {
     }
   };
 
-  const copyToClipboard = (linkId: string, slug: string) => {
-    const url = `${window.location.origin}/${user?.username}/${slug}`;
+  const copyToClipboard = (linkId: string, url: string) => {
     navigator.clipboard.writeText(url);
     setCopiedId(linkId);
     setTimeout(() => setCopiedId(null), 2000);
@@ -128,10 +127,10 @@ export function LinksPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-500">Public URL:</span>
                         <div className="text-sm text-gray-500 font-mono">
-                          {window.location.origin}/{user?.username}/{link.slug}
+                          {window.location.origin}/api/redirect/{link.id}/{link.slug}
                         </div>
                         <button
-                          onClick={() => copyToClipboard(link.id, link.slug)}
+                          onClick={() => copyToClipboard(link.id, `${window.location.origin}/api/redirect/${link.id}/${link.slug}`)}
                           className="text-gray-400 hover:text-white transition-colors"
                         >
                           {copiedId === link.id ? (

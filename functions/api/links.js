@@ -34,6 +34,8 @@ export async function onRequest(context) {
       const { user_id, slug, original_url, title } = await request.json();
       const now = new Date().toISOString();
       
+      console.log('Creating link:', { user_id, slug, original_url, title });
+      
       const result = await env.DB.prepare(
         `INSERT INTO links (user_id, slug, original_url, title, created_at, updated_at, is_active) 
          VALUES (?, ?, ?, ?, ?, ?, ?)`
@@ -46,6 +48,7 @@ export async function onRequest(context) {
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (error) {
+      console.error('Error creating link:', error);
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

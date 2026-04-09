@@ -6,8 +6,7 @@ export async function onRequest(context) {
     const userId = url.searchParams.get('user_id');
     
     if (!userId) {
-      return new Response(JSON.stringify({ error: 'user_id required' }), {
-        status: 400,
+      return new Response(JSON.stringify([]), {
         headers: { 'Content-Type': 'application/json' },
       });
     }

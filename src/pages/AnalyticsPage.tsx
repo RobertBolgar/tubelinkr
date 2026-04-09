@@ -26,13 +26,14 @@ type RecentClick = {
 };
 
 const getSourceDisplay = (source: string | null): string => {
-  if (!source) return 'Direct';
+  if (!source || source === '' || source === 'NULL') return 'Base Link';
   
   const sourceMap: Record<string, string> = {
     'd': 'Description',
     'p': 'Pinned Comment',
     'b': 'Bio',
-    'redirect': 'API Redirect'
+    's1': 'Short 1',
+    'v1': 'Video 1',
   };
   
   return sourceMap[source] || source.toUpperCase();

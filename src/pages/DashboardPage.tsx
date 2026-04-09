@@ -45,10 +45,11 @@ export function DashboardPage() {
       const linkClickCounts: Record<string, number> = {};
 
       if (linkIds.length > 0) {
-        const clickEvents = await db.getClickEventsByLinkIds(linkIds);
-        totalClicks = clickEvents?.length || 0;
+        const response = await db.getClickEventsByLinkIds(linkIds);
+        const clickEvents = response.events || [];
+        totalClicks = response.totalClicks || 0;
 
-        clickEvents?.forEach((event) => {
+        clickEvents.forEach((event) => {
           linkClickCounts[event.link_id] = (linkClickCounts[event.link_id] || 0) + 1;
         });
       }

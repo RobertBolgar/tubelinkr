@@ -15,7 +15,7 @@ const PUBLIC_BASE_URL = 'https://go.tubelinkr.com';
 
 // Map source codes to human-readable labels
 const getSourceLabel = (source: string | null): string => {
-  if (!source) return 'Direct';
+  if (!source || source === '' || source === 'NULL') return 'Base Link';
   
   const sourceMap: Record<string, string> = {
     'd': 'Description',

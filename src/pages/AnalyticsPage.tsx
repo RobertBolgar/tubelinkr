@@ -66,11 +66,11 @@ export function AnalyticsPage() {
       const response = await db.getClickEventsByLinkIds(linkIds);
       
       // Handle new API response format
-      const clickEvents = (response as any).events || response;
-      const totalClicks = (response as any).totalClicks || (clickEvents ? clickEvents.length : 0);
-      const bySource = (response as any).bySource || [];
+      const clickEvents = response.events || [];
+      const totalClicks = response.totalClicks || 0;
+      const bySource = response.bySource || [];
 
-      if (!clickEvents) {
+      if (clickEvents.length === 0) {
         setLoading(false);
         return;
       }
@@ -89,15 +89,8 @@ export function AnalyticsPage() {
         }
       });
 
-      // Use pre-calculated source analytics if available
-      const sourceStats = bySource.length > 0 ? bySource : Object.entries(
-        clickEvents.reduce((acc: any, event: any) => {
-          const sourceKey = event.source || 'direct';
-          acc[sourceKey] = (acc[sourceKey] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>)
-      ).map(([source, clicks]) => ({ source, clicks: Number(clicks) }))
-       .sort((a, b) => Number(b.clicks) - Number(a.clicks));
+      // Use pre-calculated source analytics from API
+      const sourceStats = bySource.length > 0 ? bySource : [];
 
       const linkStatsData = links
         .map((link) => ({

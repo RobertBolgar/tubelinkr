@@ -36,6 +36,20 @@ export async function onRequest(context) {
       
       console.log('Creating link:', { user_id, slug, original_url, title });
       
+      // Verify user exists
+      const user = await env.DB.prepare(
+        'SELECT id FROM users WHERE id = ? OR username = ? AND is_active = 1'
+      ).bind(user_id, user_id).first();
+      
+      if (!user) {
+        return new Response(JSON.stringify({ 
+          error: 'User not found. Please sign up first.' 
+        }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      
       const result = await env.DB.prepare(
         `INSERT INTO links (user_id, slug, original_url, title, created_at, updated_at, is_active) 
          VALUES (?, ?, ?, ?, ?, ?, ?)`

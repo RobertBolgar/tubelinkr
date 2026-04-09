@@ -3,7 +3,8 @@ export async function onRequest(context) {
   
   if (request.method === 'GET') {
     const url = new URL(request.url);
-    const username = url.pathname.split('/api/users/')[1];
+    const pathParts = url.pathname.split('/api/users/');
+    const username = pathParts.length > 1 ? pathParts[1] : null;
     
     if (!username) {
       return new Response(JSON.stringify({ error: 'username required' }), {

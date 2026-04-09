@@ -12,10 +12,14 @@ export async function onRequest(context) {
   const slug = pathParts[4];
   
   try {
+    console.log('Redirect request:', { userId, slug });
+    
     // Find the link
     const link = await env.DB.prepare(
       'SELECT id, original_url FROM links WHERE user_id = ? AND slug = ? AND is_active = 1'
     ).bind(userId, slug).first();
+    
+    console.log('Found link:', link);
     
     if (!link) {
       return new Response('Link not found', { status: 404 });
@@ -27,15 +31,23 @@ export async function onRequest(context) {
     const userAgent = request.headers.get('user-agent') || null;
     const ipHash = request.headers.get('cf-connecting-ip') || null;
     
-    await env.DB.prepare(
-      `INSERT INTO click_events (link_id, timestamp, referrer, user_agent, ip_hash, source) 
-       VALUES (?, ?, ?, ?, ?, ?)`
-    ).bind(link.id, now, referrer, userAgent, ipHash, 'redirect').run();
+    try {
+      await env.DB.prepare(
+        `INSERT INTO click_events (link_id, timestamp, referrer, user_agent, ip_hash, source) 
+         VALUES (?, ?, ?, ?, ?, ?)`
+      ).bind(link.id, now, referrer, userAgent, ipHash, 'redirect').run();
+      console.log('Click event recorded for link:', link.id);
+    } catch (clickError) {
+      console.error('Failed to record click:', clickError);
+      // Continue with redirect even if click recording fails
+    }
     
     // Redirect to original URL
+    console.log('Redirecting to:', link.original_url);
     return Response.redirect(link.original_url, 302);
     
   } catch (error) {
-    return new Response('Internal server error', { status: 500 });
+    console.error('Redirect error:', error);
+    return new Response('Internal server error: ' + error.message, { status: 500 });
   }
 }

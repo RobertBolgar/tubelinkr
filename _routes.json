@@ -1,0 +1,10 @@
+[
+  {
+    "pattern": "/api/*",
+    "plane": "functions"
+  },
+  {
+    "pattern": "/*",
+    "plane": "static"
+  }
+]

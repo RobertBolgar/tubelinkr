@@ -1,5 +1,9 @@
 [
   {
+    "pattern": "/api",
+    "plane": "functions"
+  },
+  {
     "pattern": "/api/*",
     "plane": "functions"
   },

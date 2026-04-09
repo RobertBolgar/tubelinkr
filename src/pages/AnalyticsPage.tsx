@@ -113,6 +113,17 @@ export function AnalyticsPage() {
     }
   };
 
+  const getBestSource = (sourceData: SourceStats[]) => {
+    if (!sourceData || sourceData.length === 0) return null;
+    const sorted = [...sourceData].sort((a, b) => b.clicks - a.clicks);
+    return sorted[0];
+  };
+
+  const getSourcePercentage = (clicks: number, totalClicks: number) => {
+    if (totalClicks === 0) return 0;
+    return Math.round((clicks / totalClicks) * 100);
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -144,16 +155,39 @@ export function AnalyticsPage() {
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
             <h2 className="text-xl font-bold text-white mb-4">Top Sources</h2>
             {sourceStats.length > 0 ? (
-              <div className="space-y-3">
-                {sourceStats.slice(0, 5).map((stat) => (
-                  <div key={stat.source} className="flex items-center justify-between">
-                    <span className="text-gray-300 text-sm">
-                      {formatSourceLabel(stat.source)}
-                    </span>
-                    <span className="text-white font-semibold">{stat.clicks}</span>
-                  </div>
-                ))}
-              </div>
+              <>
+                {(() => {
+                  const totalSourceClicks = sourceStats.reduce((sum, s) => sum + s.clicks, 0);
+                  const bestSource = getBestSource(sourceStats);
+                  if (bestSource && totalSourceClicks > 0) {
+                    const percent = getSourcePercentage(bestSource.clicks, totalSourceClicks);
+                    return (
+                      <div className="text-sm text-gray-500 mb-3">
+                        <span className="text-orange-400">🔥 Best:</span>{' '}
+                        <span className="text-white font-medium">{formatSourceLabel(bestSource.source)}</span>{' '}
+                        <span className="text-gray-400">({percent}%)</span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                <div className="space-y-3">
+                  {sourceStats.slice(0, 5).map((stat) => {
+                    const totalSourceClicks = sourceStats.reduce((sum, s) => sum + s.clicks, 0);
+                    const percent = totalSourceClicks > 0 
+                      ? getSourcePercentage(stat.clicks, totalSourceClicks)
+                      : 0;
+                    return (
+                      <div key={stat.source} className="flex items-center justify-between">
+                        <span className="text-gray-300 text-sm">
+                          {formatSourceLabel(stat.source)}
+                        </span>
+                        <span className="text-white font-semibold">{stat.clicks}{totalSourceClicks > 0 && <span className="text-gray-500 ml-1">({percent}%)</span>}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             ) : (
               <p className="text-gray-500 text-sm">No data yet</p>
             )}

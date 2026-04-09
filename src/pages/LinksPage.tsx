@@ -19,7 +19,7 @@ export function LinksPage() {
   const [links, setLinks] = useState<LinkWithClicks[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [selectedSources, setSelectedSources] = useState<Record<string, string>>({});
+  const [copiedVariant, setCopiedVariant] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLinks();
@@ -79,6 +79,24 @@ export function LinksPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const copyVariantToClipboard = (linkId: string, source: string) => {
+    const url = getApiUrl(linkId, links.find(l => l.id === linkId)?.slug || '', source);
+    navigator.clipboard.writeText(url);
+    setCopiedVariant(`${linkId}-${source}`);
+    setTimeout(() => setCopiedVariant(null), 1500);
+  };
+
+  const getBestSource = (sourceData: { source: string | null; clicks: number }[]) => {
+    if (!sourceData || sourceData.length === 0) return null;
+    const sorted = [...sourceData].sort((a, b) => b.clicks - a.clicks);
+    return sorted[0];
+  };
+
+  const getSourcePercentage = (clicks: number, totalClicks: number) => {
+    if (totalClicks === 0) return 0;
+    return Math.round((clicks / totalClicks) * 100);
+  };
+
   const getPublicUrl = (slug: string, source?: string): string => {
     const baseUrl = `${PUBLIC_BASE_URL}/${user?.username}/${slug}`;
     return source ? `${baseUrl}/${source}` : baseUrl;
@@ -89,17 +107,6 @@ export function LinksPage() {
     return source ? `${apiBaseUrl}?source=${source}` : apiBaseUrl;
   };
 
-  const selectSource = (linkId: string, source: string) => {
-    setSelectedSources(prev => ({ ...prev, [linkId]: source }));
-  };
-
-  const clearSource = (linkId: string) => {
-    setSelectedSources(prev => {
-      const newSources = { ...prev };
-      delete newSources[linkId];
-      return newSources;
-    });
-  };
 
   const toggleLinkStatus = async (linkId: string, currentStatus: boolean) => {
     try {
@@ -166,12 +173,12 @@ export function LinksPage() {
 
                     <div className="space-y-2 mb-4">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                        <span className="text-sm text-gray-500 whitespace-nowrap">Link URL:</span>
+                        <span className="text-sm text-gray-500 whitespace-nowrap">Working Link:</span>
                         <div className="text-sm text-gray-500 font-mono flex-1 min-w-0 break-all">
-                          {getApiUrl(link.id, link.slug, selectedSources[link.id])}
+                          {getApiUrl(link.id, link.slug)}
                         </div>
                         <button
-                          onClick={() => copyToClipboard(link.id, getApiUrl(link.id, link.slug, selectedSources[link.id]))}
+                          onClick={() => copyToClipboard(link.id, getApiUrl(link.id, link.slug))}
                           className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
                         >
                           {copiedId === link.id ? (
@@ -183,9 +190,9 @@ export function LinksPage() {
                       </div>
 
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                        <span className="text-sm text-gray-400 whitespace-nowrap">Public branded URL (not live yet):</span>
+                        <span className="text-sm text-gray-400 whitespace-nowrap">Public Link (Coming Soon):</span>
                         <div className="text-sm text-gray-600 font-mono flex-1 min-w-0 break-all">
-                          {getPublicUrl(link.slug, selectedSources[link.id])}
+                          {getPublicUrl(link.slug)}
                         </div>
                       </div>
 
@@ -207,80 +214,55 @@ export function LinksPage() {
                       <div className="text-sm text-gray-500 mb-3">Track this link in different placements:</div>
                       <div className="flex flex-wrap gap-2">
                         <button
-                          onClick={() => selectSource(link.id, 'd')}
+                          onClick={() => copyVariantToClipboard(link.id, 'd')}
                           className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-colors ${
-                            selectedSources[link.id] === 'd'
-                              ? 'bg-blue-600 text-white'
+                            copiedVariant === `${link.id}-d`
+                              ? 'bg-green-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                           }`}
                         >
-                          Description
+                          {copiedVariant === `${link.id}-d` ? 'Copied!' : 'Description'}
                         </button>
                         <button
-                          onClick={() => selectSource(link.id, 'p')}
+                          onClick={() => copyVariantToClipboard(link.id, 'p')}
                           className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-colors ${
-                            selectedSources[link.id] === 'p'
-                              ? 'bg-blue-600 text-white'
+                            copiedVariant === `${link.id}-p`
+                              ? 'bg-green-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                           }`}
                         >
-                          Pinned
+                          {copiedVariant === `${link.id}-p` ? 'Copied!' : 'Pinned'}
                         </button>
                         <button
-                          onClick={() => selectSource(link.id, 'b')}
+                          onClick={() => copyVariantToClipboard(link.id, 'b')}
                           className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-colors ${
-                            selectedSources[link.id] === 'b'
-                              ? 'bg-blue-600 text-white'
+                            copiedVariant === `${link.id}-b`
+                              ? 'bg-green-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                           }`}
                         >
-                          Bio
+                          {copiedVariant === `${link.id}-b` ? 'Copied!' : 'Bio'}
                         </button>
                         <button
-                          onClick={() => selectSource(link.id, 's1')}
+                          onClick={() => copyVariantToClipboard(link.id, 's1')}
                           className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-colors ${
-                            selectedSources[link.id] === 's1'
-                              ? 'bg-blue-600 text-white'
+                            copiedVariant === `${link.id}-s1`
+                              ? 'bg-green-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                           }`}
                         >
-                          Short 1
+                          {copiedVariant === `${link.id}-s1` ? 'Copied!' : 'Short 1'}
                         </button>
                         <button
-                          onClick={() => selectSource(link.id, 'v1')}
+                          onClick={() => copyVariantToClipboard(link.id, 'v1')}
                           className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-colors ${
-                            selectedSources[link.id] === 'v1'
-                              ? 'bg-blue-600 text-white'
+                            copiedVariant === `${link.id}-v1`
+                              ? 'bg-green-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                           }`}
                         >
-                          Video 1
+                          {copiedVariant === `${link.id}-v1` ? 'Copied!' : 'Video 1'}
                         </button>
-                        {selectedSources[link.id] && (
-                          <button
-                            onClick={() => clearSource(link.id)}
-                            className="px-2 sm:px-3 py-1.5 text-xs bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
-                          >
-                            Clear
-                          </button>
-                        )}
-                      </div>
-                      <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2">
-                        <input
-                          type="text"
-                          placeholder="enter custom code"
-                          className="px-3 py-1.5 text-xs bg-gray-800 text-gray-300 rounded border border-gray-700 focus:border-blue-500 focus:outline-none flex-1 min-w-0"
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              const customCode = e.currentTarget.value.trim().toLowerCase();
-                              if (customCode) {
-                                selectSource(link.id, customCode);
-                                e.currentTarget.value = '';
-                              }
-                            }
-                          }}
-                        />
-                        <span className="text-xs text-gray-500 whitespace-nowrap">Press Enter to add custom variant</span>
                       </div>
                     </div>
 
@@ -293,19 +275,45 @@ export function LinksPage() {
                             Total Clicks: <span className="text-white font-medium">{link.clicks}</span>
                           </div>
                           {link.sourceData && link.sourceData.length > 0 && (
-                            <div className="text-sm text-gray-500">
-                              <div className="mb-1">Top Sources:</div>
-                              <div className="space-y-1 ml-2">
-                                {link.sourceData.slice(0, 5).map((source) => (
-                                  <div key={source.source || 'null'} className="flex items-center gap-2">
-                                    <span className="text-gray-400">
-                                      {formatSourceLabel(source.source)}
-                                    </span>
-                                    <span className="text-white">{source.clicks}</span>
-                                  </div>
-                                ))}
+                            <>
+                              {(() => {
+                                const bestSource = getBestSource(link.sourceData);
+                                const totalSourceClicks = link.sourceData.reduce((sum, s) => sum + s.clicks, 0);
+                                if (bestSource && totalSourceClicks > 0) {
+                                  const percent = getSourcePercentage(bestSource.clicks, totalSourceClicks);
+                                  return (
+                                    <div className="text-sm text-gray-500">
+                                      <span className="text-orange-400">🔥 Best:</span>{' '}
+                                      <span className="text-white font-medium">{formatSourceLabel(bestSource.source)}</span>{' '}
+                                      <span className="text-gray-400">({percent}%)</span>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
+                              <div className="text-sm text-gray-500">
+                                <div className="mb-1">Top Sources:</div>
+                                <div className="space-y-1 ml-2">
+                                  {link.sourceData.slice(0, 5).map((source) => {
+                                    const totalSourceClicks = link.sourceData.reduce((sum, s) => sum + s.clicks, 0);
+                                    const percent = totalSourceClicks > 0 
+                                      ? getSourcePercentage(source.clicks, totalSourceClicks)
+                                      : 0;
+                                    return (
+                                      <div key={source.source || 'null'} className="flex items-center gap-2">
+                                        <span className="text-gray-400">
+                                          {formatSourceLabel(source.source)}
+                                        </span>
+                                        <span className="text-white">{source.clicks}</span>
+                                        {totalSourceClicks > 0 && (
+                                          <span className="text-gray-500">({percent}%)</span>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               </div>
-                            </div>
+                            </>
                           )}
                         </div>
                       )}

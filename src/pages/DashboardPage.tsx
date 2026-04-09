@@ -146,7 +146,7 @@ export function DashboardPage() {
           <p className="text-gray-400 mt-1 sm:mt-2 text-sm sm:text-base">Welcome back, @{user?.username}</p>
         </div>
 
-        {/* What's Working Right Now */}
+        {/* What's Working Right Now - Compact focused panel */}
         {stats.totalClicks > 0 && (() => {
           const bestLink = getBestLink();
           const bestSource = getBestSource();
@@ -169,32 +169,32 @@ export function DashboardPage() {
           const suggestion = suggestions[formatSourceLabel(bestSource.source)] || 'Keep using this placement';
           
           return (
-            <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-5 sm:p-6 mb-6 sm:mb-8 shadow-lg">
-              <div className="flex items-center gap-2 mb-4 sm:mb-5">
-                <Flame className="w-5 h-5 text-orange-500" />
-                <h2 className="text-base sm:text-lg font-bold text-white">What's Working Right Now</h2>
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-4 sm:p-5 mb-5 sm:mb-6 shadow-lg">
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
+                <h2 className="text-sm sm:text-base font-bold text-white">What's Working Right Now</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
-                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
-                  <div className="text-xs sm:text-sm text-gray-400 mb-1 sm:mb-2">🔥 Best Performing Link</div>
-                  <div className="text-white font-semibold sm:font-medium text-sm sm:text-base truncate">{bestLink.title}</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/30">
+                  <div className="text-xs text-gray-400 mb-1">🔥 Best Link</div>
+                  <div className="text-white font-semibold text-sm truncate">{bestLink.title}</div>
                 </div>
-                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
-                  <div className="text-xs sm:text-sm text-gray-400 mb-1 sm:mb-2">📊 Top Source</div>
-                  <div className="text-white font-semibold sm:font-medium text-sm sm:text-base">
+                <div className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/30">
+                  <div className="text-xs text-gray-400 mb-1">📊 Top Source</div>
+                  <div className="text-white font-semibold text-sm">
                     {formatSourceLabel(bestSource.source)} ({bestSourcePercent}%)
                   </div>
                 </div>
-                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
-                  <div className="text-xs sm:text-sm text-gray-400 mb-1 sm:mb-2">💡 Suggestion</div>
-                  <div className="text-white font-semibold sm:font-medium text-sm sm:text-base">{suggestion}</div>
+                <div className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/30">
+                  <div className="text-xs text-gray-400 mb-1">💡 Suggestion</div>
+                  <div className="text-white font-semibold text-sm leading-tight">{suggestion}</div>
                 </div>
               </div>
             </div>
           );
         })()}
 
-        {/* Overall Performance */}
+        {/* Overall Performance - Ranked breakdown with progress bars */}
         {stats.sourceData.length > 0 && (() => {
           const totalSourceClicks = stats.sourceData.reduce((sum, s) => sum + s.clicks, 0);
           if (totalSourceClicks === 0) return null;
@@ -202,94 +202,102 @@ export function DashboardPage() {
           const sortedSources = [...stats.sourceData].sort((a, b) => b.clicks - a.clicks);
           const topSource = sortedSources[0];
           const topSourceLabel = formatSourceLabel(topSource.source);
+          const topSourcePercent = Math.round((topSource.clicks / totalSourceClicks) * 100);
           
           return (
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 sm:p-6 mb-6 sm:mb-8 shadow-lg">
-              <div className="flex items-center gap-2 mb-4 sm:mb-5">
-                <TrendingUp className="w-5 h-5 text-green-500" />
-                <h2 className="text-base sm:text-lg font-bold text-white">Overall Performance</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <div className="text-sm text-gray-400 mb-3 font-medium">Source Breakdown</div>
-                  <div className="space-y-2.5">
-                    {sortedSources.slice(0, 5).map((source) => {
-                      const percent = Math.round((source.clicks / totalSourceClicks) * 100);
-                      return (
-                        <div key={source.source || 'null'} className="flex items-center justify-between py-1">
-                          <span className="text-gray-300 text-sm font-medium">
-                            {formatSourceLabel(source.source)}
-                          </span>
-                          <span className="text-white font-bold">{percent}%</span>
-                        </div>
-                      );
-                    })}
-                  </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 sm:p-5 mb-5 sm:mb-6 shadow-lg">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                  <h2 className="text-sm sm:text-base font-bold text-white">Overall Performance</h2>
                 </div>
-                <div className="flex items-center justify-center">
-                  <div className="bg-gray-800/50 rounded-lg p-4 sm:p-5 border border-gray-700/50 w-full max-w-sm">
-                    <div className="text-xs sm:text-sm text-gray-400 mb-2">💡 Insight</div>
-                    <div className="text-white font-semibold sm:font-medium text-sm sm:text-base text-center">
-                      {topSourceLabel} is your top performing placement
+                <div className="text-xs text-gray-400">{totalSourceClicks} total clicks</div>
+              </div>
+              <div className="space-y-3">
+                {sortedSources.slice(0, 5).map((source, index) => {
+                  const percent = Math.round((source.clicks / totalSourceClicks) * 100);
+                  return (
+                    <div key={source.source || 'null'} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500 font-mono">#{index + 1}</span>
+                          <span className="text-gray-300 font-medium">{formatSourceLabel(source.source)}</span>
+                        </div>
+                        <span className="text-white font-semibold">{percent}%</span>
+                      </div>
+                      <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-800">
+                <div className="text-xs text-gray-400 mb-1">💡 Top Insight</div>
+                <div className="text-sm text-white font-medium">
+                  {topSourceLabel} drives {topSourcePercent}% of your traffic — optimize this placement
                 </div>
               </div>
             </div>
           );
         })()}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-gray-900 border border-gray-800/50 rounded-xl p-4 sm:p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="text-gray-400 text-xs sm:text-sm font-medium">Total Links</div>
-              <LinkIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+        {/* Stat Cards - Compact secondary hierarchy */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-5">
+          <div className="bg-gray-900 border border-gray-800/30 rounded-lg p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-gray-500 text-xs font-medium">Total Links</div>
+              <LinkIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500" />
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-white">{stats.totalLinks}</div>
+            <div className="text-xl sm:text-2xl font-bold text-white">{stats.totalLinks}</div>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800/50 rounded-xl p-4 sm:p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="text-gray-400 text-xs sm:text-sm font-medium">Total Clicks</div>
-              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+          <div className="bg-gray-900 border border-gray-800/30 rounded-lg p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-gray-500 text-xs font-medium">Total Clicks</div>
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-white">{stats.totalClicks}</div>
+            <div className="text-xl sm:text-2xl font-bold text-white">{stats.totalClicks}</div>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800/50 rounded-xl p-4 sm:p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="text-gray-400 text-xs sm:text-sm font-medium">Active Links</div>
-              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+          <div className="bg-gray-900 border border-gray-800/30 rounded-lg p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-gray-500 text-xs font-medium">Active Links</div>
+              <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500" />
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-white">{stats.activeLinks}</div>
+            <div className="text-xl sm:text-2xl font-bold text-white">{stats.activeLinks}</div>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800/50 rounded-xl p-4 sm:p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="text-gray-400 text-xs sm:text-sm font-medium">Avg Clicks/Link</div>
-              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+          <div className="bg-gray-900 border border-gray-800/30 rounded-lg p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-gray-500 text-xs font-medium">Avg/Link</div>
+              <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-white">
+            <div className="text-xl sm:text-2xl font-bold text-white">
               {getAverageClicksPerLink()}
             </div>
           </div>
         </div>
 
+        {/* Secondary Cards - Tertiary hierarchy */}
         {stats.totalLinks > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-5">
             {/* Best Link */}
             {(() => {
               const bestLink = getBestLink();
               if (bestLink && bestLink.clicks > 0) {
                 return (
-                  <div className="bg-gray-900 border border-gray-800/50 rounded-xl p-4 sm:p-6 shadow-lg">
-                    <div className="flex items-center justify-between mb-3 sm:mb-4">
-                      <h3 className="text-base sm:text-lg font-bold text-white">Best Link</h3>
-                      <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
+                  <div className="bg-gray-900 border border-gray-800/30 rounded-lg p-3 sm:p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs sm:text-sm font-bold text-white">Best Link</h3>
+                      <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
                     </div>
-                    <div className="text-white font-semibold sm:font-medium text-sm sm:text-base mb-2 truncate">{bestLink.title}</div>
-                    <div className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2">{bestLink.clicks} clicks</div>
-                    <div className="text-xs text-gray-400">Top performing link</div>
+                    <div className="text-white font-semibold text-sm mb-1 truncate">{bestLink.title}</div>
+                    <div className="text-lg sm:text-xl font-bold text-white mb-1">{bestLink.clicks} clicks</div>
+                    <div className="text-xs text-gray-500">Top performing</div>
                   </div>
                 );
               }
@@ -302,14 +310,14 @@ export function DashboardPage() {
               const totalSourceClicks = stats.sourceData.reduce((sum, s) => sum + s.clicks, 0);
               if (bestSource && totalSourceClicks > 0) {
                 return (
-                  <div className="bg-gray-900 border border-gray-800/50 rounded-xl p-4 sm:p-6 shadow-lg">
-                    <div className="flex items-center justify-between mb-3 sm:mb-4">
-                      <h3 className="text-base sm:text-lg font-bold text-white">Best Source</h3>
-                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                  <div className="bg-gray-900 border border-gray-800/30 rounded-lg p-3 sm:p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs sm:text-sm font-bold text-white">Best Source</h3>
+                      <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                     </div>
-                    <div className="text-white font-semibold sm:font-medium text-sm sm:text-base mb-2">{formatSourceLabel(bestSource.source)}</div>
-                    <div className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2">{bestSource.clicks} clicks</div>
-                    <div className="text-xs text-gray-400">Best placement</div>
+                    <div className="text-white font-semibold text-sm mb-1">{formatSourceLabel(bestSource.source)}</div>
+                    <div className="text-lg sm:text-xl font-bold text-white mb-1">{bestSource.clicks} clicks</div>
+                    <div className="text-xs text-gray-500">Best placement</div>
                   </div>
                 );
               }
@@ -318,13 +326,13 @@ export function DashboardPage() {
 
             {/* Most Recent Activity */}
             {stats.mostRecentClick && (
-              <div className="bg-gray-900 border border-gray-800/50 rounded-xl p-4 sm:p-6 shadow-lg">
-                <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h3 className="text-base sm:text-lg font-bold text-white">Recent Activity</h3>
-                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+              <div className="bg-gray-900 border border-gray-800/30 rounded-lg p-3 sm:p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs sm:text-sm font-bold text-white">Recent Activity</h3>
+                  <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500" />
                 </div>
-                <div className="text-white font-semibold sm:font-medium text-sm sm:text-base mb-2 truncate">{stats.mostRecentClick.linkTitle}</div>
-                <div className="text-xs sm:text-sm text-gray-400 font-mono mb-1 sm:mb-2 break-all">
+                <div className="text-white font-semibold text-sm mb-1 truncate">{stats.mostRecentClick.linkTitle}</div>
+                <div className="text-xs text-gray-400 font-mono mb-1 break-all">
                   /{stats.mostRecentClick.linkSlug}
                 </div>
                 <div className="text-xs text-gray-500">
@@ -335,45 +343,46 @@ export function DashboardPage() {
           </div>
         )}
 
-        <div className="bg-gray-900 border border-gray-800/50 rounded-xl p-5 sm:p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-5 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-white">Top Links</h2>
-            <Link to="/links" className="text-blue-500 hover:text-blue-400 text-sm font-medium whitespace-nowrap">
+        {/* Top Links - Compact data list */}
+        <div className="bg-gray-900 border border-gray-800/30 rounded-lg p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm sm:text-base font-bold text-white">Top Links</h2>
+            <Link to="/links" className="text-blue-500 hover:text-blue-400 text-xs font-medium whitespace-nowrap">
               View all
             </Link>
           </div>
 
           {stats.totalLinks === 0 ? (
-            <div className="text-center py-10 sm:py-12">
-              <p className="text-gray-400 mb-4 text-sm sm:text-base">No links yet</p>
+            <div className="text-center py-8 sm:py-10">
+              <p className="text-gray-400 mb-3 text-sm">No links yet</p>
               <Link
                 to="/links/new"
-                className="inline-block px-5 sm:px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-sm sm:text-base"
+                className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-sm"
               >
                 Create your first link
               </Link>
             </div>
           ) : stats.totalClicks === 0 ? (
-            <div className="text-center py-10 sm:py-12">
-              <p className="text-gray-400 mb-4 text-sm sm:text-base">No click data yet</p>
-              <p className="text-sm text-gray-500">Share your links to start tracking clicks</p>
+            <div className="text-center py-8 sm:py-10">
+              <p className="text-gray-400 mb-2 text-sm">No click data yet</p>
+              <p className="text-xs text-gray-500">Share your links to start tracking</p>
             </div>
           ) : (
-            <div className="space-y-3 sm:space-y-4">
-              {stats.topLinks.map((link) => (
+            <div className="space-y-2">
+              {stats.topLinks.map((link, index) => (
                 <div
                   key={link.id}
-                  className="flex items-center justify-between p-3 sm:p-4 bg-gray-800/50 border border-gray-700/50 rounded-lg hover:bg-gray-800/70 transition-colors"
+                  className="flex items-center gap-3 p-2.5 bg-gray-800/40 border border-gray-700/30 rounded hover:bg-gray-800/60 transition-colors"
                 >
-                  <div className="flex-1 min-w-0 mr-3 sm:mr-4">
-                    <div className="text-white font-semibold sm:font-medium text-sm sm:text-base truncate mb-1">{link.title}</div>
-                    <div className="text-xs sm:text-sm text-gray-400 font-mono break-all">
-                      {window.location.host}/{user?.username}/{link.slug}
+                  <div className="text-gray-600 font-mono text-xs w-5 flex-shrink-0">#{index + 1}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-medium text-sm truncate mb-0.5">{link.title}</div>
+                    <div className="text-xs text-gray-500 font-mono truncate">
+                      /{user?.username}/{link.slug}
                     </div>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <div className="text-xl sm:text-2xl font-bold text-white">{link.clicks}</div>
-                    <div className="text-xs text-gray-400">clicks</div>
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <div className="text-lg font-bold text-white">{link.clicks}</div>
                   </div>
                 </div>
               ))}

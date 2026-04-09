@@ -220,6 +220,7 @@ export function LinksPage() {
                               ? 'bg-green-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                           }`}
+                          title="Use in YouTube description"
                         >
                           {copiedVariant === `${link.id}-d` ? 'Copied!' : 'Description'}
                         </button>
@@ -230,6 +231,7 @@ export function LinksPage() {
                               ? 'bg-green-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                           }`}
+                          title="Use in pinned comment"
                         >
                           {copiedVariant === `${link.id}-p` ? 'Copied!' : 'Pinned'}
                         </button>
@@ -240,6 +242,7 @@ export function LinksPage() {
                               ? 'bg-green-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                           }`}
+                          title="Use in channel bio"
                         >
                           {copiedVariant === `${link.id}-b` ? 'Copied!' : 'Bio'}
                         </button>
@@ -250,6 +253,7 @@ export function LinksPage() {
                               ? 'bg-green-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                           }`}
+                          title="Use in short videos"
                         >
                           {copiedVariant === `${link.id}-s1` ? 'Copied!' : 'Short 1'}
                         </button>
@@ -260,6 +264,7 @@ export function LinksPage() {
                               ? 'bg-green-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                           }`}
+                          title="Use in video content"
                         >
                           {copiedVariant === `${link.id}-v1` ? 'Copied!' : 'Video 1'}
                         </button>
@@ -299,6 +304,7 @@ export function LinksPage() {
                                     const percent = totalSourceClicks > 0 
                                       ? getSourcePercentage(source.clicks, totalSourceClicks)
                                       : 0;
+                                    const isUnderperforming = percent > 0 && percent < 5 && source.clicks > 0;
                                     return (
                                       <div key={source.source || 'null'} className="flex items-center gap-2">
                                         <span className="text-gray-400">
@@ -308,10 +314,30 @@ export function LinksPage() {
                                         {totalSourceClicks > 0 && (
                                           <span className="text-gray-500">({percent}%)</span>
                                         )}
+                                        {isUnderperforming && (
+                                          <span className="text-xs text-orange-400">⚠️ Low performance</span>
+                                        )}
                                       </div>
                                     );
                                   })}
                                 </div>
+                                {(() => {
+                                  const totalSourceClicks = link.sourceData.reduce((sum, s) => sum + s.clicks, 0);
+                                  const underperformingSources = link.sourceData.filter(source => {
+                                    const percent = totalSourceClicks > 0 
+                                      ? getSourcePercentage(source.clicks, totalSourceClicks)
+                                      : 0;
+                                    return percent > 0 && percent < 5 && source.clicks > 0;
+                                  });
+                                  if (underperformingSources.length > 0) {
+                                    return (
+                                      <div className="mt-2 text-xs text-orange-400 ml-2">
+                                        Low performance from {underperformingSources.map(s => formatSourceLabel(s.source)).join(', ')} — consider changing placement
+                                      </div>
+                                    );
+                                  }
+                                  return null;
+                                })()}
                               </div>
                             </>
                           )}

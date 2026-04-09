@@ -56,7 +56,6 @@ export function AnalyticsPage() {
       
       // Handle new API response format
       const clickEvents = response.events || [];
-      const totalClicks = response.totalClicks || 0;
       const bySource = response.bySource || [];
 
       if (clickEvents.length === 0) {

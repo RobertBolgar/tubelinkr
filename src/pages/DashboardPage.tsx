@@ -146,6 +146,99 @@ export function DashboardPage() {
           <p className="text-gray-400 mt-2">Welcome back, @{user?.username}</p>
         </div>
 
+        {/* What's Working Right Now */}
+        {stats.totalClicks > 0 && (() => {
+          const bestLink = getBestLink();
+          const bestSource = getBestSource();
+          const totalSourceClicks = stats.sourceData.reduce((sum, s) => sum + s.clicks, 0);
+          const bestSourcePercent = bestSource && totalSourceClicks > 0 
+            ? Math.round((bestSource.clicks / totalSourceClicks) * 100) 
+            : 0;
+          
+          if (!bestLink || !bestSource) return null;
+          
+          const suggestions: Record<string, string> = {
+            'Direct': 'Your direct traffic is strong - consider sharing more on social media',
+            'Description': 'Focus on description placement for this link',
+            'Pinned Comment': 'Your pinned comments are performing well - keep using them',
+            'Bio': 'Your channel bio is driving clicks - keep it updated',
+            'Short 1': 'Your short videos are converting well',
+            'Video 1': 'Your video content is effective',
+          };
+          
+          const suggestion = suggestions[formatSourceLabel(bestSource.source)] || 'Keep using this placement';
+          
+          return (
+            <div className="bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700 rounded-lg p-6 mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Flame className="w-5 h-5 text-orange-500" />
+                <h2 className="text-lg font-bold text-white">What's Working Right Now</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">🔥 Best Performing Link</div>
+                  <div className="text-white font-medium truncate">{bestLink.title}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">📊 Top Source</div>
+                  <div className="text-white font-medium">
+                    {formatSourceLabel(bestSource.source)} ({bestSourcePercent}%)
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">💡 Suggestion</div>
+                  <div className="text-white font-medium">{suggestion}</div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Overall Performance */}
+        {stats.sourceData.length > 0 && (() => {
+          const totalSourceClicks = stats.sourceData.reduce((sum, s) => sum + s.clicks, 0);
+          if (totalSourceClicks === 0) return null;
+          
+          const sortedSources = [...stats.sourceData].sort((a, b) => b.clicks - a.clicks);
+          const topSource = sortedSources[0];
+          const topSourceLabel = formatSourceLabel(topSource.source);
+          
+          return (
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="w-5 h-5 text-green-500" />
+                <h2 className="text-lg font-bold text-white">Overall Performance</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <div className="text-sm text-gray-500 mb-2">Source Breakdown</div>
+                  <div className="space-y-2">
+                    {sortedSources.slice(0, 5).map((source) => {
+                      const percent = Math.round((source.clicks / totalSourceClicks) * 100);
+                      return (
+                        <div key={source.source || 'null'} className="flex items-center justify-between">
+                          <span className="text-gray-300 text-sm">
+                            {formatSourceLabel(source.source)}
+                          </span>
+                          <span className="text-white font-semibold">{percent}%</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                    <div className="text-sm text-gray-400 mb-1">Insight</div>
+                    <div className="text-white font-medium">
+                      {topSourceLabel} is your top performing placement
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">

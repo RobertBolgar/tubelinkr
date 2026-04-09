@@ -99,7 +99,7 @@ export function LinksPage() {
   };
 
   const getPublicUrl = (slug: string, source?: string): string => {
-    const baseUrl = `${PUBLIC_BASE_URL}/${user?.username}/${slug}`;
+    const baseUrl = `https://${PUBLIC_BASE_URL}/${user?.username}/${slug}`;
     if (source) {
       return `${baseUrl}?source=${source}`;
     }
@@ -177,7 +177,7 @@ export function LinksPage() {
 
                     <div className="space-y-2 mb-4">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                        <span className="text-sm text-gray-500 whitespace-nowrap">Working Link:</span>
+                        <span className="text-sm text-gray-500 whitespace-nowrap">Tracking Link (Internal):</span>
                         <div className="text-sm text-gray-500 font-mono flex-1 min-w-0 break-all">
                           {getApiUrl(link.id, link.slug)}
                         </div>
@@ -194,10 +194,21 @@ export function LinksPage() {
                       </div>
 
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                        <span className="text-sm text-gray-400 whitespace-nowrap">Public Link (Coming Soon):</span>
-                        <div className="text-sm text-gray-600 font-mono flex-1 min-w-0 break-all">
+                        <span className="text-sm text-gray-400 whitespace-nowrap">Public Link (Live):</span>
+                        <div className="text-sm text-gray-300 font-mono flex-1 min-w-0 break-all">
                           {getPublicUrl(link.slug)}
                         </div>
+                        <button
+                          onClick={() => copyToClipboard(link.id, getPublicUrl(link.slug))}
+                          className="p-1.5 text-gray-400 hover:text-white transition-colors flex-shrink-0"
+                          title="Copy public link"
+                        >
+                          {copiedId === link.id ? (
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </button>
                       </div>
 
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">

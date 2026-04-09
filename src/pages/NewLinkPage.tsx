@@ -221,7 +221,7 @@ export function NewLinkPage() {
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Tracking Link (Use Now)
+                  Tracking Link (Internal)
                 </label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 min-w-0 px-4 py-3 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-400 font-mono break-all">
@@ -242,10 +242,10 @@ export function NewLinkPage() {
                 </label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 min-w-0 px-4 py-3 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-400 font-mono break-all">
-                    go.tubelinkr.com/{user?.username}/{createdLink.slug}
+                    https://go.tubelinkr.com/{user?.username}/{createdLink.slug}
                   </div>
                   <button
-                    onClick={() => copyToClipboard('public', `go.tubelinkr.com/${user?.username}/${createdLink.slug}`)}
+                    onClick={() => copyToClipboard('public', `https://go.tubelinkr.com/${user?.username}/${createdLink.slug}`)}
                     className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex-shrink-0"
                   >
                     {copiedLink === 'public' ? 'Copied!' : 'Copy'}

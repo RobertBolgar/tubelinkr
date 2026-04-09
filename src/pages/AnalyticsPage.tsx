@@ -25,6 +25,19 @@ type RecentClick = {
   referrer: string | null;
 };
 
+const getSourceDisplay = (source: string | null): string => {
+  if (!source) return 'Direct';
+  
+  const sourceMap: Record<string, string> = {
+    'd': 'Description',
+    'p': 'Pinned Comment',
+    'b': 'Bio',
+    'redirect': 'API Redirect'
+  };
+  
+  return sourceMap[source] || source.toUpperCase();
+};
+
 export function AnalyticsPage() {
   const { user } = useAuth();
   const [linkStats, setLinkStats] = useState<LinkStats[]>([]);
@@ -50,7 +63,12 @@ export function AnalyticsPage() {
 
       const linkIds = links.map((l) => l.id);
 
-      const clickEvents = await db.getClickEventsByLinkIds(linkIds);
+      const response = await db.getClickEventsByLinkIds(linkIds);
+      
+      // Handle new API response format
+      const clickEvents = (response as any).events || response;
+      const totalClicks = (response as any).totalClicks || (clickEvents ? clickEvents.length : 0);
+      const bySource = (response as any).bySource || [];
 
       if (!clickEvents) {
         setLoading(false);
@@ -58,22 +76,28 @@ export function AnalyticsPage() {
       }
 
       const linkClickCounts: Record<string, number> = {};
-      const sourceCounts: Record<string, number> = {};
       const now = new Date();
       const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       let clicksLast24h = 0;
 
-      clickEvents.forEach((event) => {
+      clickEvents.forEach((event: any) => {
         linkClickCounts[event.link_id] = (linkClickCounts[event.link_id] || 0) + 1;
 
         const eventDate = new Date(event.timestamp);
         if (eventDate >= yesterday) {
           clicksLast24h++;
         }
-
-        const sourceKey = event.source || 'direct';
-        sourceCounts[sourceKey] = (sourceCounts[sourceKey] || 0) + 1;
       });
+
+      // Use pre-calculated source analytics if available
+      const sourceStats = bySource.length > 0 ? bySource : Object.entries(
+        clickEvents.reduce((acc: any, event: any) => {
+          const sourceKey = event.source || 'direct';
+          acc[sourceKey] = (acc[sourceKey] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>)
+      ).map(([source, clicks]) => ({ source, clicks: Number(clicks) }))
+       .sort((a, b) => Number(b.clicks) - Number(a.clicks));
 
       const linkStatsData = links
         .map((link) => ({
@@ -84,11 +108,7 @@ export function AnalyticsPage() {
         }))
         .sort((a, b) => b.clicks - a.clicks);
 
-      const sourceStatsData = Object.entries(sourceCounts)
-        .map(([source, clicks]) => ({ source, clicks }))
-        .sort((a, b) => b.clicks - a.clicks);
-
-      const recentClicksData = clickEvents.slice(0, 50).map((event) => {
+      const recentClicksData = clickEvents.slice(0, 50).map((event: any) => {
         const link = links.find((l) => l.id === event.link_id);
         return {
           id: event.id,
@@ -101,7 +121,7 @@ export function AnalyticsPage() {
       });
 
       setLinkStats(linkStatsData);
-      setSourceStats(sourceStatsData);
+      setSourceStats(sourceStats as SourceStats[]);
       setRecentClicks(recentClicksData);
       setLast24hClicks(clicksLast24h);
     } catch (error) {
@@ -145,7 +165,9 @@ export function AnalyticsPage() {
               <div className="space-y-3">
                 {sourceStats.slice(0, 5).map((stat) => (
                   <div key={stat.source} className="flex items-center justify-between">
-                    <span className="text-gray-300 font-mono text-sm">{stat.source}</span>
+                    <span className="text-gray-300 text-sm">
+                      {getSourceDisplay(stat.source)}
+                    </span>
                     <span className="text-white font-semibold">{stat.clicks}</span>
                   </div>
                 ))}

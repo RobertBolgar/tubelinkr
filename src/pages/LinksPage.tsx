@@ -156,7 +156,60 @@ export function LinksPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="mt-4 pt-4 border-t border-gray-800">
+                      <div className="text-sm text-gray-500 mb-3">Track this link in different placements:</div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => copyToClipboard(link.id + '-d', `${user?.username}/${link.slug}/d`)}
+                          className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                        >
+                          Description
+                        </button>
+                        <button
+                          onClick={() => copyToClipboard(link.id + '-p', `${user?.username}/${link.slug}/p`)}
+                          className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                        >
+                          Pinned
+                        </button>
+                        <button
+                          onClick={() => copyToClipboard(link.id + '-b', `${user?.username}/${link.slug}/b`)}
+                          className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                        >
+                          Bio
+                        </button>
+                        <button
+                          onClick={() => copyToClipboard(link.id + '-s1', `${user?.username}/${link.slug}/s1`)}
+                          className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                        >
+                          Short 1
+                        </button>
+                        <button
+                          onClick={() => copyToClipboard(link.id + '-v1', `${user?.username}/${link.slug}/v1`)}
+                          className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                        >
+                          Video 1
+                        </button>
+                      </div>
+                      <div className="mt-3 flex items-center gap-2">
+                        <input
+                          type="text"
+                          placeholder="enter custom code"
+                          className="px-3 py-1.5 text-xs bg-gray-800 text-gray-300 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              const customCode = e.currentTarget.value.trim().toLowerCase();
+                              if (customCode) {
+                                copyToClipboard(link.id + '-' + customCode, `${user?.username}/${link.slug}/${customCode}`);
+                                e.currentTarget.value = '';
+                              }
+                            }
+                          }}
+                        />
+                        <span className="text-xs text-gray-500">Press Enter to copy custom variant</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-sm text-gray-500 mt-4">
                       <span>{link.clicks} clicks</span>
                       <span>Created {new Date(link.created_at).toLocaleDateString()}</span>
                     </div>

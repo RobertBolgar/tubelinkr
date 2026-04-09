@@ -26,9 +26,43 @@ export async function onRequest(context) {
         
         console.log('Found click events:', results ? results.length : 0);
         
-        return new Response(JSON.stringify(results || []), {
-          headers: { 'Content-Type': 'application/json' },
-        });
+        // Add source-based analytics
+        const sourceAnalytics = {};
+        let totalClicks = 0;
+        
+        if (results && results.length > 0) {
+          // Group by source
+          results.forEach(event => {
+            const source = event.source || null;
+            sourceAnalytics[source] = (sourceAnalytics[source] || 0) + 1;
+            totalClicks++;
+          });
+          
+          // Convert to array and sort by clicks descending
+          const bySource = Object.entries(sourceAnalytics)
+            .map(([source, clicks]) => ({ source, clicks }))
+            .sort((a, b) => b.clicks - a.clicks);
+          
+          // Add source analytics to response
+          const response = {
+            events: results,
+            totalClicks,
+            bySource
+          };
+          
+          return new Response(JSON.stringify(response), {
+            headers: { 'Content-Type': 'application/json' },
+          });
+        } else {
+          // Return empty response if no results
+          return new Response(JSON.stringify({
+            events: [],
+            totalClicks: 0,
+            bySource: []
+          }), {
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
       }
       
       // Handle click recording (link_id)

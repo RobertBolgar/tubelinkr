@@ -71,19 +71,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, _password: string) => {
     try {
-      // In a real implementation, this would call a Cloudflare Worker endpoint
-      // For demo purposes, we'll simulate login
-      const mockUser: User = {
-        id: 'mock-user-id',
-        email,
-        username: email.split('@')[0],
+      // Call the real users API to get/create user
+      const username = email.split('@')[0];
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, username }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sign in');
+      }
+
+      const result = await response.json();
+      const user: User = {
+        id: result.data.id.toString(),
+        email: result.data.email,
+        username: result.data.username,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         is_active: true,
       };
 
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
 
       return { error: null };
     } catch (error) {

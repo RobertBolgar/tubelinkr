@@ -77,14 +77,12 @@ export function SetupUsernamePage() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
+      // Get user data from localStorage (mock auth)
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!userData.id) {
         setError('User not authenticated');
         return;
       }
-
-      // Get user data from localStorage (mock auth)
-      const userData = JSON.parse(localStorage.getItem('user') || '{}');
       
       // Update user data with username
       const updatedUser = {

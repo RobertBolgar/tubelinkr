@@ -25,14 +25,6 @@ export async function onRequest(context) {
 
   try {
     // Route to appropriate handler
-    if (path.startsWith('/api/auth/magic-link')) {
-      return handleMagicLinkAPI(request, env, corsHeaders);
-    }
-
-    if (path.startsWith('/api/auth/verify')) {
-      return handleVerifyMagicLinkAPI(request, env, corsHeaders);
-    }
-
     if (path.startsWith('/api/users')) {
       return handleUsersAPI(request, env, corsHeaders);
     }
@@ -54,109 +46,6 @@ export async function onRequest(context) {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
-}
-
-async function handleMagicLinkAPI(request, env, corsHeaders) {
-  if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405, headers: corsHeaders });
-  }
-
-  const { email } = await request.json();
-  if (!email) {
-    return new Response(JSON.stringify({ error: 'Email required' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
-  // Generate random token
-  const token = crypto.randomUUID();
-  const now = new Date();
-  const expiresAt = new Date(now.getTime() + 15 * 60 * 1000); // 15 minutes
-
-  // Store token in database
-  await env.DB.prepare(
-    `INSERT INTO magic_link_tokens (email, token, expires_at, used, created_at) VALUES (?, ?, ?, ?, ?)`
-  ).bind(email, token, expiresAt.toISOString(), 0, now.toISOString()).run();
-
-  // For now, just log the link (in production, you'd send an email)
-  const origin = new URL(request.url).origin;
-  const magicLink = `${origin}/login?token=${token}`;
-  console.log('Magic link for', email, ':', magicLink);
-
-  // Check if user exists, if not create them
-  let user = await env.DB.prepare(`SELECT id, email, username FROM users WHERE email = ? AND is_active = 1`).bind(email).first();
-  
-  if (!user) {
-    // Create new user with email as temporary username
-    const username = email.split('@')[0] + '-' + Math.floor(Math.random() * 10000);
-    const result = await env.DB.prepare(
-      `INSERT INTO users (email, username, created_at, updated_at, is_active) VALUES (?, ?, ?, ?, ?)`
-    ).bind(email, username, now.toISOString(), now.toISOString(), 1).run();
-    user = { id: result.meta.last_row_id, email, username };
-  }
-
-  return new Response(JSON.stringify({
-    success: true,
-    message: 'Magic link sent (check console for demo)',
-    // In demo mode, return the link so you can test easily
-    magicLink: magicLink,
-    user: user,
-  }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
-}
-
-async function handleVerifyMagicLinkAPI(request, env, corsHeaders) {
-  if (request.method !== 'GET') {
-    return new Response('Method not allowed', { status: 405, headers: corsHeaders });
-  }
-
-  const url = new URL(request.url);
-  const token = url.searchParams.get('token');
-
-  if (!token) {
-    return new Response(JSON.stringify({ error: 'Token required' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
-  // Find valid token
-  const now = new Date().toISOString();
-  const tokenData = await env.DB.prepare(
-    `SELECT * FROM magic_link_tokens WHERE token = ? AND used = 0 AND expires_at > ?`
-  ).bind(token, now).first();
-
-  if (!tokenData) {
-    return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
-  // Mark token as used
-  await env.DB.prepare(`UPDATE magic_link_tokens SET used = 1 WHERE id = ?`).bind(tokenData.id).run();
-
-  // Get or create user
-  let user = await env.DB.prepare(`SELECT id, email, username FROM users WHERE email = ? AND is_active = 1`).bind(tokenData.email).first();
-  
-  if (!user) {
-    // Create user if doesn't exist
-    const username = tokenData.email.split('@')[0] + '-' + Math.floor(Math.random() * 10000);
-    const result = await env.DB.prepare(
-      `INSERT INTO users (email, username, created_at, updated_at, is_active) VALUES (?, ?, ?, ?, ?)`
-    ).bind(tokenData.email, username, now, now, 1).run();
-    user = { id: result.meta.last_row_id, email: tokenData.email, username };
-  }
-
-  return new Response(JSON.stringify({
-    success: true,
-    token: token, // Use token as auth token for simplicity
-    user: user,
-  }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
 }
 
 async function handleUsersAPI(request, env, corsHeaders) {

@@ -97,22 +97,5 @@ export interface User {
   is_active: boolean;
 }
 
-// Extend ApiClient with magic link methods
-class ApiClientWithMagicLink extends ApiClient {
-  async sendMagicLink(email: string): Promise<{ error?: string; magicLink?: string; user?: User }> {
-    const res = await fetch('/api/auth/magic-link', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    return res.json();
-  }
-
-  async verifyMagicLink(token: string): Promise<{ error?: string; token?: string; user?: User }> {
-    const res = await fetch(`/api/auth/verify?token=${token}`);
-    return res.json();
-  }
-}
-
-// Export the API client with magic link support
-export const db = new ApiClientWithMagicLink();
+// Export the API client
+export const db = new ApiClient();

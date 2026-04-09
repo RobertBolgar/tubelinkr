@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { db, User } from '../lib/cloudflare';
+import { User } from '../lib/cloudflare';
 
 interface AuthContextType {
   user: User | null;
@@ -8,8 +8,6 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
-  sendMagicLink: (email: string) => Promise<{ error: Error | null; magicLink?: string }>;
-  verifyMagicLink: (token: string) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,28 +16,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Simple JWT-based auth using Cloudflare Workers
-  const fetchUser = async (userId: string) => {
+  const refreshUser = async () => {
     try {
-      // In a real implementation, this would call a Cloudflare Worker endpoint
-      // For now, we'll use localStorage for demo purposes
       const userData = localStorage.getItem('user');
       if (userData) {
-        return JSON.parse(userData);
+        setUser(JSON.parse(userData));
+      } else {
+        setUser(null);
       }
-      return null;
     } catch (error) {
-      console.error('Error fetching user:', error);
-      return null;
-    }
-  };
-
-  const refreshUser = async () => {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      const userData = await fetchUser(token);
-      setUser(userData);
-    } else {
+      console.error('Error refreshing user:', error);
       setUser(null);
     }
   };
@@ -47,10 +33,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          const userData = await fetchUser(token);
-          setUser(userData);
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          setUser(JSON.parse(userData));
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
@@ -62,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initAuth();
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, _password: string) => {
     try {
       // In a real implementation, this would call a Cloudflare Worker endpoint
       // For demo purposes, we'll simulate user creation
@@ -76,7 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
 
       localStorage.setItem('user', JSON.stringify(mockUser));
-      localStorage.setItem('auth_token', 'mock-token');
       setUser(mockUser);
 
       return { error: null };
@@ -85,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, _password: string) => {
     try {
       // In a real implementation, this would call a Cloudflare Worker endpoint
       // For demo purposes, we'll simulate login
@@ -99,7 +83,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
 
       localStorage.setItem('user', JSON.stringify(mockUser));
-      localStorage.setItem('auth_token', 'mock-token');
       setUser(mockUser);
 
       return { error: null };
@@ -108,38 +91,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const sendMagicLink = async (email: string) => {
-    try {
-      const response = await db.sendMagicLink(email);
-      if (response.error) {
-        return { error: new Error(response.error) };
-      }
-      return { error: null, magicLink: response.magicLink };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  };
-
-  const verifyMagicLink = async (token: string) => {
-    try {
-      const response = await db.verifyMagicLink(token);
-      if (response.error) {
-        return { error: new Error(response.error) };
-      }
-      
-      localStorage.setItem('user', JSON.stringify(response.user));
-      localStorage.setItem('auth_token', response.token);
-      setUser(response.user);
-      
-      return { error: null };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  };
-
   const signOut = async () => {
     try {
-      localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
       setUser(null);
     } catch (error) {
@@ -148,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut, refreshUser, sendMagicLink, verifyMagicLink }}>
+    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

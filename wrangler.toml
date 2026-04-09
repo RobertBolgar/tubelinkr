@@ -15,10 +15,10 @@ binding = "DB"
 database_name = "tubelinkr-db"
 database_id = "7fd2cd09-fafa-496f-8310-a7e86ca5c03c"
 
-[env.staging]
-vars = { ENVIRONMENT = "staging" }
+[env.preview]
+vars = { ENVIRONMENT = "preview" }
 
-[[env.staging.d1_databases]]
+[[env.preview.d1_databases]]
 binding = "DB"
 database_name = "tubelinkr-db"
 database_id = "7fd2cd09-fafa-496f-8310-a7e86ca5c03c"

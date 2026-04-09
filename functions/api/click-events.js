@@ -38,13 +38,19 @@ export async function onRequest(context) {
   
   if (request.method === 'GET') {
     try {
-      const { link_ids } = await request.json();
+      const body = await request.json();
+      console.log('GET click events request:', body);
+      
+      const { link_ids } = body;
       
       if (!link_ids || !Array.isArray(link_ids) || link_ids.length === 0) {
+        console.log('No link_ids provided, returning empty array');
         return new Response(JSON.stringify([]), {
           headers: { 'Content-Type': 'application/json' },
         });
       }
+      
+      console.log('Fetching click events for link_ids:', link_ids);
       
       const placeholders = link_ids.map(() => '?').join(',');
       const { results } = await env.DB.prepare(
@@ -52,10 +58,13 @@ export async function onRequest(context) {
          FROM click_events WHERE link_id IN (${placeholders}) ORDER BY timestamp DESC`
       ).bind(...link_ids).all();
       
+      console.log('Found click events:', results ? results.length : 0);
+      
       return new Response(JSON.stringify(results || []), {
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (error) {
+      console.error('GET click events error:', error);
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

@@ -58,8 +58,11 @@ export function LinksPage() {
     }
   };
 
-  const copyToClipboard = (linkId: string, url: string) => {
-    navigator.clipboard.writeText(url);
+  const copyToClipboard = (linkId: string, publicUrl: string, linkSlug: string, source?: string) => {
+    // Copy the working API URL internally
+    const apiBaseUrl = `${window.location.origin}/api/redirect/${linkId}/${linkSlug}`;
+    const apiUrl = source ? `${apiBaseUrl}?source=${source}` : apiBaseUrl;
+    navigator.clipboard.writeText(apiUrl);
     setCopiedId(linkId);
     setTimeout(() => setCopiedId(null), 2000);
   };
@@ -151,7 +154,7 @@ export function LinksPage() {
                           {getPublicUrl(link.id, link.slug, selectedSources[link.id])}
                         </div>
                         <button
-                          onClick={() => copyToClipboard(link.id, getPublicUrl(link.id, link.slug, selectedSources[link.id]))}
+                          onClick={() => copyToClipboard(link.id, getPublicUrl(link.id, link.slug, selectedSources[link.id]), link.slug, selectedSources[link.id])}
                           className="text-gray-400 hover:text-white transition-colors"
                         >
                           {copiedId === link.id ? (

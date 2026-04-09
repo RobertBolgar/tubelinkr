@@ -226,12 +226,10 @@ export function DashboardPage() {
                     })}
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <div>
-                    <div className="text-sm text-gray-400 mb-1">Insight</div>
-                    <div className="text-white font-medium">
-                      {topSourceLabel} is your top performing placement
-                    </div>
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">💡 Insight</div>
+                  <div className="text-white font-medium">
+                    {topSourceLabel} is your top performing placement
                   </div>
                 </div>
               </div>

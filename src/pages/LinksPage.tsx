@@ -9,8 +9,8 @@ type LinkWithClicks = LinkType & {
   clicks: number;
 };
 
-// Public base URL for branded links
-const PUBLIC_BASE_URL = 'https://tubelinkr.com';
+// Public base URL for branded links (future subdomain)
+const PUBLIC_BASE_URL = 'https://go.tubelinkr.com';
 
 export function LinksPage() {
   const { user } = useAuth();
@@ -58,18 +58,20 @@ export function LinksPage() {
     }
   };
 
-  const copyToClipboard = (linkId: string, publicUrl: string, linkSlug: string, source?: string) => {
-    // Copy the working API URL internally
-    const apiBaseUrl = `${window.location.origin}/api/redirect/${linkId}/${linkSlug}`;
-    const apiUrl = source ? `${apiBaseUrl}?source=${source}` : apiBaseUrl;
-    navigator.clipboard.writeText(apiUrl);
+  const copyToClipboard = (linkId: string, url: string) => {
+    navigator.clipboard.writeText(url);
     setCopiedId(linkId);
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const getPublicUrl = (linkId: string, slug: string, source?: string): string => {
+  const getPublicUrl = (slug: string, source?: string): string => {
     const baseUrl = `${PUBLIC_BASE_URL}/${user?.username}/${slug}`;
     return source ? `${baseUrl}/${source}` : baseUrl;
+  };
+
+  const getApiUrl = (linkId: string, slug: string, source?: string): string => {
+    const apiBaseUrl = `${window.location.origin}/api/redirect/${linkId}/${slug}`;
+    return source ? `${apiBaseUrl}?source=${source}` : apiBaseUrl;
   };
 
   const selectSource = (linkId: string, source: string) => {
@@ -149,12 +151,12 @@ export function LinksPage() {
 
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500">Public URL:</span>
-                        <div className="text-sm text-gray-500 font-mono">
-                          {getPublicUrl(link.id, link.slug, selectedSources[link.id])}
+                        <span className="text-sm text-gray-500">Link URL:</span>
+                        <div className="text-sm text-gray-500 font-mono flex-1">
+                          {getApiUrl(link.id, link.slug, selectedSources[link.id])}
                         </div>
                         <button
-                          onClick={() => copyToClipboard(link.id, getPublicUrl(link.id, link.slug, selectedSources[link.id]), link.slug, selectedSources[link.id])}
+                          onClick={() => copyToClipboard(link.id, getApiUrl(link.id, link.slug, selectedSources[link.id]))}
                           className="text-gray-400 hover:text-white transition-colors"
                         >
                           {copiedId === link.id ? (
@@ -163,6 +165,13 @@ export function LinksPage() {
                             <Copy className="w-4 h-4" />
                           )}
                         </button>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-400">Public branded URL (not live yet):</span>
+                        <div className="text-sm text-gray-600 font-mono flex-1">
+                          {getPublicUrl(link.slug, selectedSources[link.id])}
+                        </div>
                       </div>
 
                       <div className="flex items-center gap-2">

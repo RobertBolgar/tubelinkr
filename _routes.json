@@ -3,5 +3,14 @@
   "include": [
     "/api/*"
   ],
-  "exclude": []
+  "exclude": [
+    "/login",
+    "/signup", 
+    "/dashboard",
+    "/links",
+    "/analytics",
+    "/profile",
+    "/assets/*",
+    "/_next/*"
+  ]
 }

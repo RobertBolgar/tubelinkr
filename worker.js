@@ -12,7 +12,7 @@
  * (e.g., https://tubelinkr.pages.dev or your custom domain)
  */
 
-const MAIN_APP_ORIGIN = 'https://tubelinkr.com'; // TODO: Replace with your actual main app domain
+const MAIN_APP_ORIGIN = 'https://tubelinkrgit.pages.dev'; // TODO: Replace with your actual main app domain
 
 export default {
   async fetch(request, env, ctx) {

@@ -35,10 +35,14 @@ export async function onRequest(context) {
       const { email, username } = await request.json();
       const now = new Date().toISOString();
       
+      console.log('Creating user:', { email, username });
+      
       const result = await env.DB.prepare(
         `INSERT INTO users (email, username, created_at, updated_at, is_active) 
          VALUES (?, ?, ?, ?, ?)`
       ).bind(email, username, now, now, 1).run();
+      
+      console.log('User created successfully:', result.meta.last_row_id);
       
       return new Response(JSON.stringify({
         success: true,
@@ -47,6 +51,7 @@ export async function onRequest(context) {
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (error) {
+      console.error('Error creating user:', error);
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

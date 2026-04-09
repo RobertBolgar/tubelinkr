@@ -27,25 +27,31 @@ export default {
     const username = pathParts[0];
     const slug = pathParts[1];
     
-    console.log('Public redirect request:', { username, slug });
+    console.log('=== Public Redirect Request ===');
+    console.log('Requested username:', username);
+    console.log('Requested slug:', slug);
+    console.log('Using MAIN_APP_ORIGIN:', MAIN_APP_ORIGIN);
     
     try {
       // Look up user by username - call main app's API
-      const userResponse = await fetch(`${MAIN_APP_ORIGIN}/api/users/${username}`);
+      const userLookupUrl = `${MAIN_APP_ORIGIN}/api/users/${username}`;
+      console.log('User lookup URL:', userLookupUrl);
+      
+      const userResponse = await fetch(userLookupUrl);
       
       if (!userResponse.ok) {
-        console.log('User not found:', username);
+        console.log('User not found:', username, 'Status:', userResponse.status);
         return new Response('User not found', { status: 404 });
       }
       
       const user = await userResponse.json();
       
       if (!user || !user.id) {
-        console.log('Invalid user response');
+        console.log('Invalid user response:', user);
         return new Response('User not found', { status: 404 });
       }
       
-      console.log('Found user:', user.id);
+      console.log('Resolved user ID:', user.id);
       
       // Build redirect URL to existing tracking endpoint on main app
       const source = url.searchParams.get('source');
@@ -53,9 +59,11 @@ export default {
       
       if (source) {
         redirectUrl.searchParams.set('source', source);
+        console.log('Source parameter:', source);
       }
       
-      console.log('Redirecting to tracking endpoint:', redirectUrl.toString());
+      console.log('Final redirect URL:', redirectUrl.toString());
+      console.log('=== End Request ===');
       
       // Redirect to the existing tracking endpoint
       // This preserves all analytics logic

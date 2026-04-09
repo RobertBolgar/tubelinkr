@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../lib/cloudflare';
+import { formatSourceLabel } from '../lib/utils';
 import { Layout } from '../components/Layout';
 import { TrendingUp } from 'lucide-react';
 
@@ -25,19 +26,6 @@ type RecentClick = {
   referrer: string | null;
 };
 
-const getSourceDisplay = (source: string | null): string => {
-  if (!source || source === '' || source === 'NULL') return 'Direct';
-  
-  const sourceMap: Record<string, string> = {
-    'd': 'Description',
-    'p': 'Pinned Comment',
-    'b': 'Bio',
-    's1': 'Short 1',
-    'v1': 'Video 1',
-  };
-  
-  return sourceMap[source] || source.toUpperCase();
-};
 
 export function AnalyticsPage() {
   const { user } = useAuth();
@@ -160,7 +148,7 @@ export function AnalyticsPage() {
                 {sourceStats.slice(0, 5).map((stat) => (
                   <div key={stat.source} className="flex items-center justify-between">
                     <span className="text-gray-300 text-sm">
-                      {getSourceDisplay(stat.source)}
+                      {formatSourceLabel(stat.source)}
                     </span>
                     <span className="text-white font-semibold">{stat.clicks}</span>
                   </div>
@@ -212,7 +200,7 @@ export function AnalyticsPage() {
                     </div>
                     {click.source && (
                       <div className="text-xs text-blue-400 mt-1">
-                        Source: {click.source}
+                        Source: {formatSourceLabel(click.source)}
                       </div>
                     )}
                   </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db, Link as LinkType } from '../lib/cloudflare';
+import { formatSourceLabel } from '../lib/utils';
 import { Layout } from '../components/Layout';
 import { Plus, CreditCard as Edit, Copy, CheckCircle2, ExternalLink } from 'lucide-react';
 
@@ -12,21 +13,6 @@ type LinkWithClicks = LinkType & {
 
 // Public base URL for branded links (future subdomain)
 const PUBLIC_BASE_URL = 'https://go.tubelinkr.com';
-
-// Map source codes to human-readable labels
-const getSourceLabel = (source: string | null): string => {
-  if (!source || source === '' || source === 'NULL') return 'Direct';
-  
-  const sourceMap: Record<string, string> = {
-    'd': 'Description',
-    'p': 'Pinned Comment',
-    'b': 'Bio',
-    's1': 'Short 1',
-    'v1': 'Video 1',
-  };
-  
-  return sourceMap[source] || source.toUpperCase();
-};
 
 export function LinksPage() {
   const { user } = useAuth();
@@ -313,7 +299,7 @@ export function LinksPage() {
                                 {link.sourceData.slice(0, 5).map((source) => (
                                   <div key={source.source || 'null'} className="flex items-center gap-2">
                                     <span className="text-gray-400">
-                                      {getSourceLabel(source.source)}
+                                      {formatSourceLabel(source.source)}
                                     </span>
                                     <span className="text-white">{source.clicks}</span>
                                   </div>

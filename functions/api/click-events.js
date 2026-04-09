@@ -3,18 +3,32 @@ export async function onRequest(context) {
   
   if (request.method === 'POST') {
     try {
-      const { link_id, referrer, user_agent, ip_hash, source } = await request.json();
+      const body = await request.json();
+      console.log('Click event received:', body);
+      
+      const { link_id, referrer, user_agent, ip_hash, source } = body;
       const now = new Date().toISOString();
       
-      await env.DB.prepare(
+      if (!link_id) {
+        console.error('Missing link_id in click event');
+        return new Response(JSON.stringify({ error: 'link_id required' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      
+      const result = await env.DB.prepare(
         `INSERT INTO click_events (link_id, timestamp, referrer, user_agent, ip_hash, source) 
            VALUES (?, ?, ?, ?, ?, ?)`
       ).bind(link_id, now, referrer || null, user_agent || null, ip_hash || null, source || null).run();
       
-      return new Response(JSON.stringify({ success: true }), {
+      console.log('Click event recorded:', { link_id, result });
+      
+      return new Response(JSON.stringify({ success: true, id: result.meta.last_row_id }), {
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (error) {
+      console.error('Click event error:', error);
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

@@ -7,7 +7,12 @@
  * 2. Looks up user by username to get userId
  * 3. Redirects internally to /api/redirect/{userId}/{slug}?source={code}
  * 4. Preserves all existing analytics and tracking logic
+ * 
+ * IMPORTANT: Replace MAIN_APP_ORIGIN with your main application domain
+ * (e.g., https://tubelinkr.pages.dev or your custom domain)
  */
+
+const MAIN_APP_ORIGIN = 'https://tubelinkr.pages.dev'; // TODO: Replace with your actual main app domain
 
 export default {
   async fetch(request, env, ctx) {
@@ -25,8 +30,8 @@ export default {
     console.log('Public redirect request:', { username, slug });
     
     try {
-      // Look up user by username
-      const userResponse = await fetch(`${url.origin}/api/users/${username}`);
+      // Look up user by username - call main app's API
+      const userResponse = await fetch(`${MAIN_APP_ORIGIN}/api/users/${username}`);
       
       if (!userResponse.ok) {
         console.log('User not found:', username);
@@ -42,9 +47,9 @@ export default {
       
       console.log('Found user:', user.id);
       
-      // Build redirect URL to existing tracking endpoint
+      // Build redirect URL to existing tracking endpoint on main app
       const source = url.searchParams.get('source');
-      const redirectUrl = new URL(`${url.origin}/api/redirect/${user.id}/${slug}`);
+      const redirectUrl = new URL(`${MAIN_APP_ORIGIN}/api/redirect/${user.id}/${slug}`);
       
       if (source) {
         redirectUrl.searchParams.set('source', source);

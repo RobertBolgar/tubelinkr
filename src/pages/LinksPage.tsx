@@ -99,7 +99,7 @@ export function LinksPage() {
   };
 
   const getPublicUrl = (slug: string, source?: string): string => {
-    const baseUrl = `https://${PUBLIC_BASE_URL}/${user?.username}/${slug}`;
+    const baseUrl = `${PUBLIC_BASE_URL}/${user?.username}/${slug}`;
     if (source) {
       return `${baseUrl}?source=${source}`;
     }

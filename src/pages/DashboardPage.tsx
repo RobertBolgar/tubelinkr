@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../lib/cloudflare';
+import { formatSourceLabel } from '../lib/utils';
 import { Layout } from '../components/Layout';
-import { ExternalLink, TrendingUp, Link as LinkIcon, Activity } from 'lucide-react';
+import { ExternalLink, TrendingUp, Link as LinkIcon, Activity, Flame, Clock } from 'lucide-react';
 
 type DashboardStats = {
   totalLinks: number;
@@ -15,6 +16,15 @@ type DashboardStats = {
     slug: string;
     clicks: number;
   }>;
+  sourceData: Array<{
+    source: string | null;
+    clicks: number;
+  }>;
+  mostRecentClick: {
+    linkTitle: string;
+    linkSlug: string;
+    timestamp: string;
+  } | null;
 };
 
 export function DashboardPage() {
@@ -24,6 +34,8 @@ export function DashboardPage() {
     totalClicks: 0,
     activeLinks: 0,
     topLinks: [],
+    sourceData: [],
+    mostRecentClick: null,
   });
   const [loading, setLoading] = useState(true);
 
@@ -44,14 +56,34 @@ export function DashboardPage() {
       let totalClicks = 0;
       const linkClickCounts: Record<string, number> = {};
 
+      let sourceData: Array<{ source: string | null; clicks: number }> = [];
+      let mostRecentClick: { linkTitle: string; linkSlug: string; timestamp: string } | null = null;
+
       if (linkIds.length > 0) {
         const response = await db.getClickEventsByLinkIds(linkIds);
         const clickEvents = response.events || [];
         totalClicks = response.totalClicks || 0;
+        sourceData = response.bySource || [];
 
         clickEvents.forEach((event) => {
           linkClickCounts[event.link_id] = (linkClickCounts[event.link_id] || 0) + 1;
         });
+
+        // Get most recent click
+        if (clickEvents.length > 0) {
+          const sortedEvents = [...clickEvents].sort((a, b) => 
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          );
+          const mostRecent = sortedEvents[0];
+          const link = links?.find((l) => l.id === mostRecent.link_id);
+          if (link) {
+            mostRecentClick = {
+              linkTitle: link.title || link.slug,
+              linkSlug: link.slug,
+              timestamp: mostRecent.timestamp,
+            };
+          }
+        }
       }
 
       const topLinks = links
@@ -69,6 +101,8 @@ export function DashboardPage() {
         totalClicks,
         activeLinks,
         topLinks,
+        sourceData,
+        mostRecentClick,
       });
 
     } catch (error) {
@@ -76,6 +110,22 @@ export function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getBestLink = () => {
+    if (stats.topLinks.length === 0) return null;
+    return stats.topLinks[0];
+  };
+
+  const getBestSource = () => {
+    if (stats.sourceData.length === 0) return null;
+    const sorted = [...stats.sourceData].sort((a, b) => b.clicks - a.clicks);
+    return sorted[0];
+  };
+
+  const getAverageClicksPerLink = () => {
+    if (stats.totalLinks === 0) return 0;
+    return (stats.totalClicks / stats.totalLinks).toFixed(1);
   };
 
   if (loading) {
@@ -127,10 +177,70 @@ export function DashboardPage() {
               <ExternalLink className="w-5 h-5 text-green-500" />
             </div>
             <div className="text-3xl font-bold text-white">
-              {stats.totalLinks > 0 ? Math.round(stats.totalClicks / stats.totalLinks) : 0}
+              {getAverageClicksPerLink()}
             </div>
           </div>
         </div>
+
+        {stats.totalLinks > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Best Link */}
+            {(() => {
+              const bestLink = getBestLink();
+              if (bestLink && bestLink.clicks > 0) {
+                return (
+                  <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-white">Best Link</h3>
+                      <Flame className="w-5 h-5 text-orange-500" />
+                    </div>
+                    <div className="text-white font-medium mb-1 truncate">{bestLink.title}</div>
+                    <div className="text-2xl font-bold text-white mb-1">{bestLink.clicks} clicks</div>
+                    <div className="text-xs text-gray-500">Top performing link</div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Best Source */}
+            {(() => {
+              const bestSource = getBestSource();
+              const totalSourceClicks = stats.sourceData.reduce((sum, s) => sum + s.clicks, 0);
+              if (bestSource && totalSourceClicks > 0) {
+                return (
+                  <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-white">Best Source</h3>
+                      <TrendingUp className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div className="text-white font-medium mb-1">{formatSourceLabel(bestSource.source)}</div>
+                    <div className="text-2xl font-bold text-white mb-1">{bestSource.clicks} clicks</div>
+                    <div className="text-xs text-gray-500">Best placement</div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Most Recent Activity */}
+            {stats.mostRecentClick && (
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-white">Recent Activity</h3>
+                  <Clock className="w-5 h-5 text-blue-500" />
+                </div>
+                <div className="text-white font-medium mb-1 truncate">{stats.mostRecentClick.linkTitle}</div>
+                <div className="text-sm text-gray-500 font-mono mb-1 break-all">
+                  /{stats.mostRecentClick.linkSlug}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {new Date(stats.mostRecentClick.timestamp).toLocaleString()}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">
@@ -140,7 +250,22 @@ export function DashboardPage() {
             </Link>
           </div>
 
-          {stats.topLinks.length > 0 ? (
+          {stats.totalLinks === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 mb-4">No links yet</p>
+              <Link
+                to="/links/new"
+                className="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+              >
+                Create your first link
+              </Link>
+            </div>
+          ) : stats.totalClicks === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 mb-4">No click data yet</p>
+              <p className="text-sm text-gray-500">Share your links to start tracking clicks</p>
+            </div>
+          ) : (
             <div className="space-y-4">
               {stats.topLinks.map((link) => (
                 <div
@@ -159,16 +284,6 @@ export function DashboardPage() {
                   </div>
                 </div>
               ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-400 mb-4">No links yet</p>
-              <Link
-                to="/links/new"
-                className="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-              >
-                Create your first link
-              </Link>
             </div>
           )}
         </div>

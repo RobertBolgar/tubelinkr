@@ -4,8 +4,34 @@ export async function onRequest(context) {
   if (request.method === 'POST') {
     try {
       const body = await request.json();
-      console.log('Click event received:', body);
+      console.log('POST click events request:', body);
       
+      // Handle analytics retrieval (link_ids array)
+      if (body.link_ids && Array.isArray(body.link_ids)) {
+        console.log('Retrieving analytics for link_ids:', body.link_ids);
+        
+        const link_ids = body.link_ids.map(id => String(id));
+        
+        if (link_ids.length === 0) {
+          return new Response(JSON.stringify([]), {
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        
+        const placeholders = link_ids.map(() => '?').join(',');
+        const { results } = await env.DB.prepare(
+          `SELECT id, link_id, referrer, user_agent, ip_hash, source, timestamp 
+           FROM click_events WHERE link_id IN (${placeholders}) ORDER BY timestamp DESC`
+        ).bind(...link_ids).all();
+        
+        console.log('Found click events:', results ? results.length : 0);
+        
+        return new Response(JSON.stringify(results || []), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      
+      // Handle click recording (link_id)
       const { link_id, referrer, user_agent, ip_hash, source } = body;
       const now = new Date().toISOString();
       
@@ -28,7 +54,7 @@ export async function onRequest(context) {
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (error) {
-      console.error('Click event error:', error);
+      console.error('POST click events error:', error);
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

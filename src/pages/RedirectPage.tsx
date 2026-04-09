@@ -73,10 +73,10 @@ export function RedirectPage() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <h1 className="text-6xl font-bold text-white mb-4">404</h1>
-          <h2 className="text-2xl font-semibold text-gray-300 mb-4">Link not found</h2>
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 overflow-x-hidden">
+        <div className="text-center max-w-md overflow-x-hidden">
+          <h1 className="text-4xl sm:text-6xl font-bold text-white mb-4">404</h1>
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-300 mb-4">Link not found</h2>
           <p className="text-gray-400 mb-8">
             This link doesn't exist or has been deactivated.
           </p>
@@ -92,7 +92,7 @@ export function RedirectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center overflow-x-hidden">
       <div className="text-gray-400">Redirecting...</div>
     </div>
   );

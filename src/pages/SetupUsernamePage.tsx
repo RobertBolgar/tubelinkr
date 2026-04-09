@@ -105,8 +105,8 @@ export function SetupUsernamePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 overflow-x-hidden">
+      <div className="max-w-md w-full space-y-8 overflow-x-hidden">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white">Choose your username</h2>
           <p className="mt-2 text-gray-400">
@@ -116,7 +116,7 @@ export function SetupUsernamePage() {
 
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
           <div className="text-sm text-gray-400 mb-4">Your links will look like:</div>
-          <div className="bg-gray-950 border border-gray-800 rounded px-4 py-3 text-sm text-blue-400 font-mono">
+          <div className="bg-gray-950 border border-gray-800 rounded px-4 py-3 text-sm text-blue-400 font-mono break-all">
             {window.location.host}/<span className="text-blue-300">{username || 'yourname'}</span>/link-slug
           </div>
         </div>

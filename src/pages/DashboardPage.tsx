@@ -90,9 +90,9 @@ export function DashboardPage() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 overflow-x-hidden">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Dashboard</h1>
           <p className="text-gray-400 mt-2">Welcome back, @{user?.username}</p>
         </div>
 
@@ -135,7 +135,7 @@ export function DashboardPage() {
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-white">Top Links</h2>
-            <Link to="/links" className="text-blue-500 hover:text-blue-400 text-sm font-medium">
+            <Link to="/links" className="text-blue-500 hover:text-blue-400 text-sm font-medium whitespace-nowrap">
               View all
             </Link>
           </div>
@@ -147,13 +147,13 @@ export function DashboardPage() {
                   key={link.id}
                   className="flex items-center justify-between p-4 bg-gray-950 border border-gray-800 rounded-lg"
                 >
-                  <div className="flex-1">
-                    <div className="text-white font-medium">{link.title}</div>
-                    <div className="text-sm text-gray-500 font-mono">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-medium truncate">{link.title}</div>
+                    <div className="text-sm text-gray-500 font-mono break-all">
                       {window.location.host}/{user?.username}/{link.slug}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex-shrink-0 ml-4">
                     <div className="text-2xl font-bold text-white">{link.clicks}</div>
                     <div className="text-xs text-gray-500">clicks</div>
                   </div>

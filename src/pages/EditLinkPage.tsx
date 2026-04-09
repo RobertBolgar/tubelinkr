@@ -123,9 +123,9 @@ export function EditLinkPage() {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto px-4 py-8 sm:px-6 lg:px-8 overflow-x-hidden">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Edit Link</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Edit Link</h1>
           <p className="text-gray-400 mt-2">Update your link settings</p>
         </div>
 
@@ -184,15 +184,15 @@ export function EditLinkPage() {
             <label htmlFor="slug" className="block text-sm font-medium text-gray-300 mb-2">
               Slug
             </label>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-gray-500">{window.location.host}/{user?.username}/</span>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+              <span className="text-gray-500 text-xs sm:text-sm whitespace-nowrap">{window.location.host}/{user?.username}/</span>
               <input
                 id="slug"
                 name="slug"
                 type="text"
                 value={slug}
                 onChange={handleSlugChange}
-                className="flex-1 px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="flex-1 min-w-0 px-3 sm:px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                 placeholder="my-link"
               />
             </div>
@@ -215,7 +215,7 @@ export function EditLinkPage() {
             </label>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <button
               type="button"
               onClick={() => navigate('/links')}

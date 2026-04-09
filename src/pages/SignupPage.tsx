@@ -71,8 +71,8 @@ export function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 overflow-x-hidden">
+      <div className="max-w-md w-full space-y-8 overflow-x-hidden">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white">Create your account</h2>
           <p className="mt-2 text-gray-400">Start creating clean links for your content</p>

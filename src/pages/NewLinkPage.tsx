@@ -96,9 +96,9 @@ export function NewLinkPage() {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto px-4 py-8 sm:px-6 lg:px-8 overflow-x-hidden">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Create New Link</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Create New Link</h1>
           <p className="text-gray-400 mt-2">Transform your messy URL into a clean, shareable link</p>
         </div>
 
@@ -137,7 +137,7 @@ export function NewLinkPage() {
               Custom Slug (optional)
             </label>
             <div className="flex">
-              <div className="inline-flex items-center px-3 bg-gray-800 border border-r-0 border-gray-700 rounded-l-lg text-gray-400">
+              <div className="inline-flex items-center px-2 sm:px-3 bg-gray-800 border border-r-0 border-gray-700 rounded-l-lg text-gray-400 text-xs sm:text-sm whitespace-nowrap">
                 {window.location.host}/{user?.username}/
               </div>
               <input
@@ -146,7 +146,7 @@ export function NewLinkPage() {
                 value={slug}
                 onChange={handleSlugChange}
                 placeholder="my-link"
-                className="flex-1 px-4 py-3 bg-gray-900 border border-gray-800 rounded-r-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 min-w-0 px-3 sm:px-4 py-3 bg-gray-900 border border-gray-800 rounded-r-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <p className="mt-2 text-xs text-gray-500">
@@ -160,7 +160,7 @@ export function NewLinkPage() {
             </div>
           )}
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <button
               type="button"
               onClick={() => navigate('/links')}

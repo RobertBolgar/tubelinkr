@@ -125,15 +125,15 @@ export function LinksPage() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Your Links</h1>
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 overflow-x-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Your Links</h1>
             <p className="text-gray-400 mt-2">{links.length} total links</p>
           </div>
           <Link
             to="/links/new"
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors whitespace-nowrap"
           >
             <Plus className="w-5 h-5" />
             New Link
@@ -147,9 +147,9 @@ export function LinksPage() {
                 key={link.id}
                 className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-white">
                         {link.title || link.slug}
                       </h3>
@@ -165,14 +165,14 @@ export function LinksPage() {
                     </div>
 
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500">Link URL:</span>
-                        <div className="text-sm text-gray-500 font-mono flex-1">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <span className="text-sm text-gray-500 whitespace-nowrap">Link URL:</span>
+                        <div className="text-sm text-gray-500 font-mono flex-1 min-w-0 break-all">
                           {getApiUrl(link.id, link.slug, selectedSources[link.id])}
                         </div>
                         <button
                           onClick={() => copyToClipboard(link.id, getApiUrl(link.id, link.slug, selectedSources[link.id]))}
-                          className="text-gray-400 hover:text-white transition-colors"
+                          className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
                         >
                           {copiedId === link.id ? (
                             <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -182,20 +182,20 @@ export function LinksPage() {
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-400">Public branded URL (not live yet):</span>
-                        <div className="text-sm text-gray-600 font-mono flex-1">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <span className="text-sm text-gray-400 whitespace-nowrap">Public branded URL (not live yet):</span>
+                        <div className="text-sm text-gray-600 font-mono flex-1 min-w-0 break-all">
                           {getPublicUrl(link.slug, selectedSources[link.id])}
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500">Destination:</span>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <span className="text-sm text-gray-500 whitespace-nowrap">Destination:</span>
                         <a
                           href={link.original_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1 truncate max-w-lg"
+                          className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1 truncate flex-1 min-w-0"
                         >
                           {link.original_url}
                           <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -208,7 +208,7 @@ export function LinksPage() {
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => selectSource(link.id, 'd')}
-                          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                          className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-colors ${
                             selectedSources[link.id] === 'd'
                               ? 'bg-blue-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
@@ -218,7 +218,7 @@ export function LinksPage() {
                         </button>
                         <button
                           onClick={() => selectSource(link.id, 'p')}
-                          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                          className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-colors ${
                             selectedSources[link.id] === 'p'
                               ? 'bg-blue-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
@@ -228,7 +228,7 @@ export function LinksPage() {
                         </button>
                         <button
                           onClick={() => selectSource(link.id, 'b')}
-                          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                          className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-colors ${
                             selectedSources[link.id] === 'b'
                               ? 'bg-blue-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
@@ -238,7 +238,7 @@ export function LinksPage() {
                         </button>
                         <button
                           onClick={() => selectSource(link.id, 's1')}
-                          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                          className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-colors ${
                             selectedSources[link.id] === 's1'
                               ? 'bg-blue-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
@@ -248,7 +248,7 @@ export function LinksPage() {
                         </button>
                         <button
                           onClick={() => selectSource(link.id, 'v1')}
-                          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                          className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-colors ${
                             selectedSources[link.id] === 'v1'
                               ? 'bg-blue-600 text-white'
                               : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
@@ -259,17 +259,17 @@ export function LinksPage() {
                         {selectedSources[link.id] && (
                           <button
                             onClick={() => clearSource(link.id)}
-                            className="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+                            className="px-2 sm:px-3 py-1.5 text-xs bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
                           >
                             Clear
                           </button>
                         )}
                       </div>
-                      <div className="mt-3 flex items-center gap-2">
+                      <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2">
                         <input
                           type="text"
                           placeholder="enter custom code"
-                          className="px-3 py-1.5 text-xs bg-gray-800 text-gray-300 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+                          className="px-3 py-1.5 text-xs bg-gray-800 text-gray-300 rounded border border-gray-700 focus:border-blue-500 focus:outline-none flex-1 min-w-0"
                           onKeyPress={(e) => {
                             if (e.key === 'Enter') {
                               const customCode = e.currentTarget.value.trim().toLowerCase();
@@ -280,7 +280,7 @@ export function LinksPage() {
                             }
                           }}
                         />
-                        <span className="text-xs text-gray-500">Press Enter to add custom variant</span>
+                        <span className="text-xs text-gray-500 whitespace-nowrap">Press Enter to add custom variant</span>
                       </div>
                     </div>
 
@@ -315,16 +315,16 @@ export function LinksPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-2 sm:ml-4">
                     <Link
                       to={`/links/${link.id}/edit`}
-                      className="p-2 text-gray-400 hover:text-white transition-colors"
+                      className="p-2 text-gray-400 hover:text-white transition-colors flex-shrink-0"
                     >
                       <Edit className="w-5 h-5" />
                     </Link>
                     <button
                       onClick={() => toggleLinkStatus(link.id, link.is_active)}
-                      className="px-3 py-1.5 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+                      className="px-3 py-1.5 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors whitespace-nowrap"
                     >
                       {link.is_active ? 'Deactivate' : 'Activate'}
                     </button>

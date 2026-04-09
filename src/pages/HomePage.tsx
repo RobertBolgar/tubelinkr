@@ -3,8 +3,8 @@ import { ArrowRight } from 'lucide-react';
 
 export function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <div className="max-w-5xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-950 text-white overflow-x-hidden">
+      <div className="max-w-5xl mx-auto px-4 py-16 sm:px-6 lg:px-8 overflow-x-hidden">
         <div className="text-center space-y-8">
           <div className="inline-block px-4 py-1.5 bg-gray-800 border border-gray-700 rounded-full text-sm text-gray-300 mb-4">
             Beta creator tool
@@ -35,23 +35,23 @@ export function HomePage() {
 
               <div className="text-left">
                 <div className="text-sm text-gray-500 mb-2">After:</div>
-                <div className="bg-gray-950 border border-blue-800 rounded px-4 py-3 text-sm text-blue-400 font-mono">
+                <div className="bg-gray-950 border border-blue-800 rounded px-4 py-3 text-sm text-blue-400 font-mono break-all">
                   {window.location.host}/robert/best-plane
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-center gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
             <Link
               to="/signup"
-              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-center"
             >
               Get started
             </Link>
             <Link
               to="/login"
-              className="px-8 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors"
+              className="px-8 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors text-center"
             >
               Sign in
             </Link>

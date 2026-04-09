@@ -26,7 +26,7 @@ type RecentClick = {
 };
 
 const getSourceDisplay = (source: string | null): string => {
-  if (!source || source === '' || source === 'NULL') return 'Base Link';
+  if (!source || source === '' || source === 'NULL') return 'Direct';
   
   const sourceMap: Record<string, string> = {
     'd': 'Description',

@@ -37,10 +37,25 @@ export async function onRequest(context) {
       
       console.log('Creating user:', { email, username });
       
-      const result = await env.DB.prepare(
-        `INSERT INTO users (email, username, created_at, updated_at, is_active) 
-         VALUES (?, ?, ?, ?, ?)`
-      ).bind(email, username, now, now, 1).run();
+      // Try to create user, but if they already exist, return existing user
+      let result;
+      try {
+        result = await env.DB.prepare(
+          `INSERT INTO users (email, username, created_at, updated_at, is_active) 
+           VALUES (?, ?, ?, ?, ?)`
+        ).bind(email, username, now, now, 1).run();
+      } catch (insertError) {
+        // User already exists, get existing user
+        const existingUser = await env.DB.prepare(
+          'SELECT id, email, username FROM users WHERE email = ? AND is_active = 1'
+        ).bind(email).first();
+        
+        if (!existingUser) {
+          throw insertError; // Re-throw if it's not a duplicate error
+        }
+        
+        result = { meta: { last_row_id: existingUser.id } };
+      }
       
       console.log('User created successfully:', result.meta.last_row_id);
       

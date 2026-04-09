@@ -24,19 +24,6 @@ export async function onRequest(context) {
   };
 
   try {
-    console.log('API Request:', path, request.method);
-    
-    // Check if DB is available
-    if (!env.DB) {
-      console.error('DB binding not available');
-      return new Response(JSON.stringify({ error: 'Database not available' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    
-    console.log('DB binding available');
-    
     // Route to appropriate handler
     if (path.startsWith('/api/users')) {
       return handleUsersAPI(request, env, corsHeaders);
@@ -54,8 +41,7 @@ export async function onRequest(context) {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('API Error:', error);
-    return new Response(JSON.stringify({ error: error.message, stack: error.stack }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

@@ -1,17 +1,7 @@
 {
   "version": 1,
   "include": [
-    "/api/*",
-    "/[[catchall]]"
+    "/api/*"
   ],
-  "exclude": [
-    "/login",
-    "/signup", 
-    "/dashboard",
-    "/links",
-    "/analytics",
-    "/profile",
-    "/assets/*",
-    "/_next/*"
-  ]
+  "exclude": []
 }

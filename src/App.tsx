@@ -12,6 +12,7 @@ import { EditLinkPage } from './pages/EditLinkPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { RedirectPage } from './pages/RedirectPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { PlacementsPage } from './pages/PlacementsPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAppAuth();
@@ -142,6 +143,14 @@ function AppRoutes() {
         element={
           <UsernameSetupRoute>
             <SettingsPage />
+          </UsernameSetupRoute>
+        } 
+      />
+      <Route 
+        path="/links/:linkId/placements" 
+        element={
+          <UsernameSetupRoute>
+            <PlacementsPage />
           </UsernameSetupRoute>
         } 
       />

@@ -93,6 +93,7 @@ export interface Link {
   created_at: string;
   updated_at: string;
   is_active: boolean;
+  placement_count?: number;
 }
 
 // User type export for TypeScript

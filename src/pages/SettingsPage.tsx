@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth as useAppAuth } from '../contexts/AuthContext';
 import { useUser as useClerkUser } from '@clerk/clerk-react';
+import { Layout } from '../components/Layout';
 
 export function SettingsPage() {
   const { user } = useAppAuth();
@@ -79,7 +80,8 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 py-8 px-4">
+    <Layout>
+      <div className="min-h-screen bg-gray-950 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-8">Settings</h1>
 
@@ -134,5 +136,6 @@ export function SettingsPage() {
         </div>
       </div>
     </div>
+    </Layout>
   );
 }

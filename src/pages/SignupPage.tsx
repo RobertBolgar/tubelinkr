@@ -8,6 +8,7 @@ export function SignupPage() {
           routing="path" 
           path="/signup"
           signInUrl="/login"
+          fallbackRedirectUrl="/dashboard"
           appearance={{
             elements: {
               rootBox: 'mx-auto',

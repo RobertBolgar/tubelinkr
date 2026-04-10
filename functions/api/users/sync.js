@@ -52,23 +52,49 @@ export async function onRequestPost(context) {
       });
     }
     
-    // Create new user without username (will be set in setup-username)
+    // Generate a valid username from email
+    const emailPrefix = email.split('@')[0].toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    let username = emailPrefix;
+    
+    // Check if username is already taken
+    let existingUsername = await env.DB.prepare(
+      'SELECT id FROM users WHERE username = ? AND is_active = 1'
+    ).bind(username).first();
+    
+    if (existingUsername) {
+      // Append timestamp to ensure uniqueness
+      const timestamp = Date.now().toString().slice(-6);
+      username = `${emailPrefix}${timestamp}`;
+      
+      // Double check the new username
+      existingUsername = await env.DB.prepare(
+        'SELECT id FROM users WHERE username = ? AND is_active = 1'
+      ).bind(username).first();
+      
+      if (existingUsername) {
+        // If still taken, use random suffix
+        const randomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        username = `${emailPrefix}${randomSuffix}`;
+      }
+    }
+    
+    // Create new user with generated username
     const result = await env.DB.prepare(
       `INSERT INTO users (email, username, clerk_user_id, created_at, updated_at, is_active) 
-       VALUES (?, NULL, ?, ?, ?, ?)`
-    ).bind(email, clerk_user_id, now, now, 1).run();
+       VALUES (?, ?, ?, ?, ?, ?)`
+    ).bind(email, username, clerk_user_id, now, now, 1).run();
     
     const newUser = {
       id: result.meta.last_row_id,
       email,
-      username: null,
+      username,
       clerk_user_id,
       created_at: now,
       updated_at: now,
       is_active: 1
     };
     
-    console.log('Created new user:', newUser.id);
+    console.log('Created new user with username:', newUser.id, username);
     
     return new Response(JSON.stringify({
       success: true,

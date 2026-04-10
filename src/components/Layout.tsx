@@ -59,6 +59,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   >
                     Analytics
                   </Link>
+                  <Link
+                    to="/settings"
+                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Settings
+                  </Link>
                   
                   <div className="flex items-center space-x-2 text-sm text-gray-300">
                     <span>@{user.username}</span>
@@ -122,6 +128,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 className="block text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium"
               >
                 Analytics
+              </Link>
+              <Link
+                to="/settings"
+                onClick={handleNavClick}
+                className="block text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+              >
+                Settings
               </Link>
               
               <div className="border-t border-gray-800 pt-4 mt-4">

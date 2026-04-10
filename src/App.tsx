@@ -11,6 +11,7 @@ import { NewLinkPage } from './pages/NewLinkPage';
 import { EditLinkPage } from './pages/EditLinkPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { RedirectPage } from './pages/RedirectPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAppAuth();
@@ -133,6 +134,14 @@ function AppRoutes() {
         element={
           <UsernameSetupRoute>
             <AnalyticsPage />
+          </UsernameSetupRoute>
+        } 
+      />
+      <Route 
+        path="/settings" 
+        element={
+          <UsernameSetupRoute>
+            <SettingsPage />
           </UsernameSetupRoute>
         } 
       />

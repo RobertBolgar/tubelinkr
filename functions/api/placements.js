@@ -13,10 +13,12 @@ export async function onRequest(context) {
     }
     
     try {
-      const placements = await env.DB.prepare(
+      const result = await env.DB.prepare(
         `SELECT id, link_id, name, type, source_code, created_at, updated_at 
          FROM placements WHERE link_id = ? ORDER BY created_at DESC`
       ).bind(linkId).all();
+      
+      const placements = result.results || [];
       
       // Get click counts for each placement
       const placementsWithClicks = await Promise.all(

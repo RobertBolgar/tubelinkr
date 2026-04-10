@@ -61,33 +61,27 @@ function AppRoutes() {
       <Route 
         path="/login" 
         element={
-          <SignedOut>
-            <LoginPage />
-          </SignedOut>
-        } 
-      />
-      <Route 
-        path="/login" 
-        element={
-          <SignedIn>
-            <Navigate to="/dashboard" replace />
-          </SignedIn>
-        } 
-      />
-      <Route 
-        path="/signup" 
-        element={
-          <SignedOut>
-            <SignupPage />
-          </SignedOut>
+          <>
+            <SignedIn>
+              <Navigate to="/dashboard" replace />
+            </SignedIn>
+            <SignedOut>
+              <LoginPage />
+            </SignedOut>
+          </>
         } 
       />
       <Route 
         path="/signup" 
         element={
-          <SignedIn>
-            <Navigate to="/dashboard" replace />
-          </SignedIn>
+          <>
+            <SignedIn>
+              <Navigate to="/dashboard" replace />
+            </SignedIn>
+            <SignedOut>
+              <SignupPage />
+            </SignedOut>
+          </>
         } 
       />
       <Route 

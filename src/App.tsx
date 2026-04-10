@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SignedIn, SignedOut } from '@clerk/clerk-react';
+import { AuthProvider, useAuth as useAppAuth } from './contexts/AuthContext';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
@@ -12,7 +13,7 @@ import { AnalyticsPage } from './pages/AnalyticsPage';
 import { RedirectPage } from './pages/RedirectPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAppAuth();
   
   if (loading) {
     return (
@@ -30,7 +31,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function UsernameSetupRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAppAuth();
   
   if (loading) {
     return (
@@ -55,8 +56,38 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
+      <Route 
+        path="/login" 
+        element={
+          <SignedOut>
+            <LoginPage />
+          </SignedOut>
+        } 
+      />
+      <Route 
+        path="/login" 
+        element={
+          <SignedIn>
+            <Navigate to="/dashboard" replace />
+          </SignedIn>
+        } 
+      />
+      <Route 
+        path="/signup" 
+        element={
+          <SignedOut>
+            <SignupPage />
+          </SignedOut>
+        } 
+      />
+      <Route 
+        path="/signup" 
+        element={
+          <SignedIn>
+            <Navigate to="/dashboard" replace />
+          </SignedIn>
+        } 
+      />
       <Route 
         path="/setup-username" 
         element={

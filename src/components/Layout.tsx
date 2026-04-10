@@ -1,15 +1,17 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, Menu, X } from 'lucide-react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const { signOut: clerkSignOut } = useClerkAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
-    await signOut();
+    await clerkSignOut();
     navigate('/');
     setMobileMenuOpen(false);
   };

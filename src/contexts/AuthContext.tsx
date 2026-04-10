@@ -1,11 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useUser as useClerkUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { User } from '../lib/cloudflare';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -13,108 +12,92 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { user: clerkUser, isLoaded: clerkLoaded } = useClerkUser();
+  const { getToken } = useClerkAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshUser = async () => {
+  const syncUserToBackend = async (clerkUserId: string, email: string) => {
     try {
-      const userData = localStorage.getItem('user');
-      if (userData) {
-        setUser(JSON.parse(userData));
-      } else {
-        setUser(null);
+      const token = await getToken();
+      const response = await fetch('/api/users/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ clerk_user_id: clerkUserId, email }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync user');
       }
+
+      const result = await response.json();
+      return result.data;
     } catch (error) {
-      console.error('Error refreshing user:', error);
+      console.error('Error syncing user:', error);
+      return null;
+    }
+  };
+
+  const refreshUser = async () => {
+    if (!clerkUser) {
       setUser(null);
+      return;
+    }
+
+    const syncedUser = await syncUserToBackend(clerkUser.id, clerkUser.emailAddresses[0]?.emailAddress || '');
+    
+    if (syncedUser) {
+      setUser({
+        id: syncedUser.id.toString(),
+        email: syncedUser.email,
+        username: syncedUser.username,
+        clerk_user_id: syncedUser.clerk_user_id,
+        created_at: syncedUser.created_at,
+        updated_at: syncedUser.updated_at,
+        is_active: syncedUser.is_active,
+      });
     }
   };
 
   useEffect(() => {
     const initAuth = async () => {
-      try {
-        const userData = localStorage.getItem('user');
-        if (userData) {
-          setUser(JSON.parse(userData));
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-      } finally {
-        setLoading(false);
+      if (!clerkLoaded) {
+        return;
       }
+
+      if (clerkUser) {
+        const syncedUser = await syncUserToBackend(clerkUser.id, clerkUser.emailAddresses[0]?.emailAddress || '');
+        
+        if (syncedUser) {
+          setUser({
+            id: syncedUser.id.toString(),
+            email: syncedUser.email,
+            username: syncedUser.username,
+            clerk_user_id: syncedUser.clerk_user_id,
+            created_at: syncedUser.created_at,
+            updated_at: syncedUser.updated_at,
+            is_active: syncedUser.is_active,
+          });
+        }
+      } else {
+        setUser(null);
+      }
+
+      setLoading(false);
     };
 
     initAuth();
-  }, []);
-
-  const signUp = async (email: string, _password: string) => {
-    try {
-      // In a real implementation, this would call a Cloudflare Worker endpoint
-      // For demo purposes, we'll simulate user creation
-      const mockUser: User = {
-        id: 'mock-user-id',
-        email,
-        username: email.split('@')[0],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is_active: true,
-      };
-
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
-
-      return { error: null };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  };
-
-  const signIn = async (email: string, _password: string) => {
-    try {
-      // Call the real users API to get/create user
-      const username = email.split('@')[0];
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, username }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to sign in');
-      }
-
-      const result = await response.json();
-      const user: User = {
-        id: result.data.id.toString(),
-        email: result.data.email,
-        username: result.data.username,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is_active: true,
-      };
-
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
-
-      return { error: null };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  };
+  }, [clerkUser, clerkLoaded]);
 
   const signOut = async () => {
-    try {
-      localStorage.removeItem('user');
-      setUser(null);
-    } catch (error) {
-      console.error('Sign out error:', error);
-    }
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -100,6 +100,7 @@ export interface User {
   id: string;
   email: string;
   username: string;
+  clerk_user_id?: string;
   created_at: string;
   updated_at: string;
   is_active: boolean;

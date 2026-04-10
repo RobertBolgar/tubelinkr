@@ -16,8 +16,6 @@ createRoot(document.getElementById('root')!).render(
       publishableKey={PUBLISHABLE_KEY}
       signInUrl="/login"
       signUpUrl="/signup"
-      afterSignInUrl="/dashboard"
-      afterSignUpUrl="/dashboard"
     >
       <App />
     </ClerkProvider>

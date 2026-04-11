@@ -32,13 +32,20 @@ export function EditLinkPage() {
       return;
     }
 
-    console.log('fetchLink: Fetching link with id:', id);
+    console.log('fetchLink: Fetching link with id:', id, 'current user.id:', user?.id);
     try {
       const link = await db.getLinkById(id);
-      console.log('fetchLink: Received link data:', link);
+      console.log('fetchLink: Received link data:', link, 'link.user_id:', link?.user_id, 'type:', typeof link?.user_id);
       
-      if (!link || link.user_id !== user?.id) {
-        console.log('fetchLink: Link not found or user mismatch, navigating to /links');
+      if (!link) {
+        console.log('fetchLink: Link not found, navigating to /links');
+        navigate('/links');
+        return;
+      }
+
+      // Fix type mismatch: link.user_id is number, user.id is string
+      if (String(link.user_id) !== String(user?.id)) {
+        console.log('fetchLink: User mismatch - link.user_id:', link.user_id, 'user.id:', user?.id, 'navigating to /links');
         navigate('/links');
         return;
       }

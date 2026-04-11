@@ -21,7 +21,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 overflow-x-hidden">
+    <div className="min-h-screen min-h-[100dvh] bg-gray-950 overflow-x-hidden">
       <nav className="bg-gray-900 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">

@@ -157,7 +157,9 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <AppRoutes />
+        <div className="min-h-screen min-h-[100dvh] bg-gray-950">
+          <AppRoutes />
+        </div>
       </Router>
     </AuthProvider>
   );

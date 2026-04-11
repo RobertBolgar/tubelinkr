@@ -132,7 +132,7 @@ export function SettingsPage() {
 
             <div className="mt-6 pt-6 border-t border-gray-800">
               <p className="text-sm text-gray-400">
-                <strong>Note:</strong> Your username is used in your public links (e.g., tubelinkr.com/{user.username}/slug). Changing your username will change your public link URLs, but your existing links will still work.
+                <strong>Note:</strong> Your username is used in your public links (e.g., tubelinkr.com/{user.username}/slug). Changing your username will change your public link URLs, and your existing links will no longer work.
               </p>
             </div>
           </div>

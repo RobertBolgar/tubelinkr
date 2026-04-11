@@ -180,7 +180,7 @@ export function AnalyticsPage() {
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-            <h2 className="text-xl font-bold text-white mb-4">Top Sources</h2>
+            <h2 className="text-xl font-bold text-white mb-4">Top placements</h2>
             {sourceStats.length > 0 ? (
               <>
                 {(() => {
@@ -261,7 +261,7 @@ export function AnalyticsPage() {
                     </div>
                     {click.source && (
                       <div className="text-xs text-blue-400 mt-1">
-                        Source: {formatSourceLabelWithPlacements(click.source)}
+                        Placement: {formatSourceLabelWithPlacements(click.source)}
                       </div>
                     )}
                   </div>

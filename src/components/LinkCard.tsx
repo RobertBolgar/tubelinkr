@@ -92,12 +92,12 @@ export function LinkCard({ link, username, onToggleStatus, onAddPlacement, onVie
             <span className="text-white font-medium">{link.clicks}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-gray-500">Placements:</span>
+            <span className="text-gray-500">Where you used it:</span>
             <span className="text-white font-medium">{link.placement_count || 0}</span>
           </div>
           {link.bestPlacement && (
             <div className="flex items-center gap-2">
-              <span className="text-gray-500">Best:</span>
+              <span className="text-gray-500">Top performing:</span>
               <span className="text-white font-medium">{link.bestPlacement.name}</span>
               <span className="text-gray-400">({link.bestPlacement.clicks} clicks)</span>
             </div>
@@ -111,14 +111,14 @@ export function LinkCard({ link, username, onToggleStatus, onAddPlacement, onVie
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Add Placement
+            Track new placement
           </button>
           <button
             onClick={() => onViewPlacements(link.id)}
             className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
           >
             <List className="w-4 h-4" />
-            View Placements
+            View performance
           </button>
           <Link
             to={`/links/${link.id}/edit`}

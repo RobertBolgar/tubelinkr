@@ -197,7 +197,7 @@ export function DashboardPage() {
             'Video 1': 'Your video content is effective',
           };
           
-          const suggestion = suggestions[formatSourceLabelWithPlacements(bestSource.source)] || 'Keep using this placement';
+          const suggestion = suggestions[formatSourceLabelWithPlacements(bestSource.source)] || 'This placement is currently performing best — consider using it more often';
           
           return (
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-4 sm:p-5 mb-5 sm:mb-6 shadow-lg">
@@ -207,17 +207,17 @@ export function DashboardPage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/30">
-                  <div className="text-xs text-gray-400 mb-1">🔥 Best Link</div>
+                  <div className="text-xs text-gray-400 mb-1">🔥 Top link right now</div>
                   <div className="text-white font-semibold text-sm truncate">{bestLink.title}</div>
                 </div>
                 <div className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/30">
-                  <div className="text-xs text-gray-400 mb-1">📊 Top Source</div>
+                  <div className="text-xs text-gray-400 mb-1">📊 Top performing placement</div>
                   <div className="text-white font-semibold text-sm">
                     {formatSourceLabelWithPlacements(bestSource.source)} ({bestSourcePercent}%)
                   </div>
                 </div>
                 <div className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/30">
-                  <div className="text-xs text-gray-400 mb-1">💡 Suggestion</div>
+                  <div className="text-xs text-gray-400 mb-1">💡 Recommendation</div>
                   <div className="text-white font-semibold text-sm leading-tight">{suggestion}</div>
                 </div>
               </div>
@@ -269,7 +269,7 @@ export function DashboardPage() {
               <div className="mt-4 pt-4 border-t border-gray-800">
                 <div className="text-xs text-gray-400 mb-1">💡 Top Insight</div>
                 <div className="text-sm text-white font-medium">
-                  {topSourceLabel} drives {topSourcePercent}% of your traffic — optimize this placement
+                  {topSourceLabel} drives {topSourcePercent}% of your traffic — this placement is working best
                 </div>
               </div>
             </div>
@@ -323,7 +323,7 @@ export function DashboardPage() {
                 return (
                   <div className="bg-gray-900 border border-gray-800/30 rounded-lg p-3 sm:p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-xs sm:text-sm font-bold text-white">Best Link</h3>
+                      <h3 className="text-xs sm:text-sm font-bold text-white">Top link right now</h3>
                       <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
                     </div>
                     <div className="text-white font-semibold text-sm mb-1 truncate">{bestLink.title}</div>
@@ -343,12 +343,12 @@ export function DashboardPage() {
                 return (
                   <div className="bg-gray-900 border border-gray-800/30 rounded-lg p-3 sm:p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-xs sm:text-sm font-bold text-white">Best Source</h3>
+                      <h3 className="text-xs sm:text-sm font-bold text-white">Top performing placement</h3>
                       <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                     </div>
                     <div className="text-white font-semibold text-sm mb-1">{formatSourceLabelWithPlacements(bestSource.source)}</div>
                     <div className="text-lg sm:text-xl font-bold text-white mb-1">{bestSource.clicks} clicks</div>
-                    <div className="text-xs text-gray-500">Best placement</div>
+                    <div className="text-xs text-gray-500">Top performing</div>
                   </div>
                 );
               }

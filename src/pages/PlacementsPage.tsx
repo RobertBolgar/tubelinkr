@@ -145,9 +145,9 @@ export function PlacementsPage() {
             Back to Links
           </Link>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-            Placements for {linkInfo?.title || linkInfo?.slug}
+            Performance for {linkInfo?.title || linkInfo?.slug}
           </h1>
-          <p className="text-gray-400">{placements.length} total placements</p>
+          <p className="text-gray-400">{placements.length} placements tracked</p>
         </div>
 
         <div className="mb-6 flex justify-end">
@@ -156,19 +156,19 @@ export function PlacementsPage() {
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
           >
             <Plus className="w-5 h-5" />
-            Add Placement
+            Track new placement
           </button>
         </div>
 
         {placements.length === 0 ? (
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-12 text-center">
-            <p className="text-gray-400 mb-4">No placements yet</p>
+            <p className="text-gray-400 mb-4">No placements tracked yet</p>
             <button
               onClick={() => setShowAddModal(true)}
               className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
             >
               <Plus className="w-5 h-5" />
-              Add your first placement
+              Track your first placement
             </button>
           </div>
         ) : (
@@ -187,7 +187,7 @@ export function PlacementsPage() {
                       Clicks
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Source Code
+                      Tracking code
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Actions
@@ -214,7 +214,7 @@ export function PlacementsPage() {
                           <button
                             onClick={() => copyPlacementUrl(placement)}
                             className="p-2 text-gray-400 hover:text-white transition-colors"
-                            title="Copy placement URL"
+                            title="Copy tracking link"
                           >
                             {copiedId === placement.id ? (
                               <CheckCircle2 className="w-4 h-4 text-green-500" />

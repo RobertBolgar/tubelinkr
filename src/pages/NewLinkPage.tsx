@@ -282,7 +282,7 @@ export function NewLinkPage() {
           <div className="space-y-6">
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-bold text-white">Create New Link</h1>
-              <p className="text-gray-400 mt-2">Transform your messy URL into a clean, shareable link</p>
+              <p className="text-gray-400 mt-2">Turn any link into a clean, trackable link you can use across your content</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -360,6 +360,9 @@ export function NewLinkPage() {
               </div>
             )}
             <p className="mt-2 text-xs text-gray-500">
+              This is the part of your link people will see
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
               Only lowercase letters, numbers, and hyphens allowed. 3–50 characters.
             </p>
           </div>

@@ -33,6 +33,7 @@ export function AnalyticsPage() {
   const [sourceStats, setSourceStats] = useState<SourceStats[]>([]);
   const [recentClicks, setRecentClicks] = useState<RecentClick[]>([]);
   const [last24hClicks, setLast24hClicks] = useState(0);
+  const [placementMap, setPlacementMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,6 +52,25 @@ export function AnalyticsPage() {
       }
 
       const linkIds = links.map((l) => l.id);
+
+      // Fetch placements to map source codes to names
+      const newPlacementMap: Record<string, string> = {};
+      if (linkIds.length > 0) {
+        try {
+          const placementPromises = linkIds.map(linkId => 
+            fetch(`/api/placements?link_id=${linkId}`)
+              .then(res => res.ok ? res.json() : [])
+              .catch(() => [])
+          );
+          const allPlacements = await Promise.all(placementPromises);
+          allPlacements.flat().forEach((p: { source_code: string; name: string }) => {
+            newPlacementMap[p.source_code] = p.name;
+          });
+          setPlacementMap(newPlacementMap);
+        } catch (error) {
+          console.error('Error fetching placements:', error);
+        }
+      }
 
       const response = await db.getClickEventsByLinkIds(linkIds);
       
@@ -123,6 +143,14 @@ export function AnalyticsPage() {
     return Math.round((clicks / totalClicks) * 100);
   };
 
+  const formatSourceLabelWithPlacements = (source: string | null) => {
+    if (!source) return 'Direct';
+    if (placementMap[source]) {
+      return placementMap[source];
+    }
+    return formatSourceLabel(source);
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -163,7 +191,7 @@ export function AnalyticsPage() {
                     return (
                       <div className="text-sm text-gray-500 mb-3">
                         <span className="text-orange-400">🔥 Best:</span>{' '}
-                        <span className="text-white font-medium">{formatSourceLabel(bestSource.source)}</span>{' '}
+                        <span className="text-white font-medium">{formatSourceLabelWithPlacements(bestSource.source)}</span>{' '}
                         <span className="text-gray-400">({percent}%)</span>
                       </div>
                     );
@@ -179,7 +207,7 @@ export function AnalyticsPage() {
                     return (
                       <div key={stat.source} className="flex items-center justify-between">
                         <span className="text-gray-300 text-sm">
-                          {formatSourceLabel(stat.source)}
+                          {formatSourceLabelWithPlacements(stat.source)}
                         </span>
                         <span className="text-white font-semibold">{stat.clicks}{totalSourceClicks > 0 && <span className="text-gray-500 ml-1">({percent}%)</span>}</span>
                       </div>
@@ -233,7 +261,7 @@ export function AnalyticsPage() {
                     </div>
                     {click.source && (
                       <div className="text-xs text-blue-400 mt-1">
-                        Source: {formatSourceLabel(click.source)}
+                        Source: {formatSourceLabelWithPlacements(click.source)}
                       </div>
                     )}
                   </div>

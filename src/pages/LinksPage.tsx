@@ -39,14 +39,10 @@ export function LinksPage() {
       if (linkIds.length > 0) {
         const clickData = await db.getClickEventsByLinkIds(linkIds);
         
-        // Use totalClicks from the new API response
-        const totalClicks = clickData.totalClicks || 0;
-        
-        // Distribute total clicks across links (simplified approach)
-        const clicksPerLink = totalClicks > 0 ? Math.ceil(totalClicks / linkIds.length) : 0;
-        
-        linkIds.forEach(linkId => {
-          clickCounts[linkId] = clicksPerLink;
+        // Count clicks per link from events
+        clickData.events.forEach((event: any) => {
+          const linkId = String(event.link_id);
+          clickCounts[linkId] = (clickCounts[linkId] || 0) + 1;
         });
       }
 

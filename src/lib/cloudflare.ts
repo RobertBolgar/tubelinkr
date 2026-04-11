@@ -105,6 +105,7 @@ export interface User {
   created_at: string;
   updated_at: string;
   is_active: boolean;
+  username_confirmed_by_user?: boolean;
 }
 
 // Export the API client

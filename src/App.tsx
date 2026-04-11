@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { SetupUsernamePage } from './pages/SetupUsernamePage';
+import { OnboardingPage } from './pages/OnboardingPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { LinksPage } from './pages/LinksPage';
 import { NewLinkPage } from './pages/NewLinkPage';
@@ -51,6 +52,11 @@ function UsernameSetupRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/setup-username" replace />;
   }
   
+  // If user hasn't confirmed their username yet, send to onboarding
+  if (user.username_confirmed_by_user === false || user.username_confirmed_by_user === 0 || !user.username_confirmed_by_user) {
+    return <Navigate to="/onboarding" replace />;
+  }
+  
   return <>{children}</>;
 }
 
@@ -82,6 +88,14 @@ function AppRoutes() {
               <SignupPage />
             </SignedOut>
           </>
+        } 
+      />
+      <Route 
+        path="/onboarding" 
+        element={
+          <ProtectedRoute>
+            <OnboardingPage />
+          </ProtectedRoute>
         } 
       />
       <Route 

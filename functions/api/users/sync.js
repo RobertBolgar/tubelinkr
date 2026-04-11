@@ -9,7 +9,7 @@ export async function onRequestPost(context) {
     
     // Check if user already exists by clerk_user_id
     let user = await env.DB.prepare(
-      'SELECT id, email, username, clerk_user_id, created_at, updated_at, is_active FROM users WHERE clerk_user_id = ?'
+      'SELECT id, email, username, clerk_user_id, created_at, updated_at, is_active, username_confirmed_by_user FROM users WHERE clerk_user_id = ?'
     ).bind(clerk_user_id).first();
     
     if (user) {
@@ -80,9 +80,9 @@ export async function onRequestPost(context) {
     
     // Create new user with generated username
     const result = await env.DB.prepare(
-      `INSERT INTO users (email, username, clerk_user_id, created_at, updated_at, is_active) 
-       VALUES (?, ?, ?, ?, ?, ?)`
-    ).bind(email, username, clerk_user_id, now, now, 1).run();
+      `INSERT INTO users (email, username, clerk_user_id, created_at, updated_at, is_active, username_confirmed_by_user) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(email, username, clerk_user_id, now, now, 1, 0).run();
     
     const newUser = {
       id: result.meta.last_row_id,
@@ -91,7 +91,8 @@ export async function onRequestPost(context) {
       clerk_user_id,
       created_at: now,
       updated_at: now,
-      is_active: 1
+      is_active: 1,
+      username_confirmed_by_user: 0
     };
     
     console.log('Created new user with username:', newUser.id, username);

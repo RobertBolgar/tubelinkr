@@ -18,6 +18,28 @@ export function NewLinkPage() {
   const [debouncedSlug, setDebouncedSlug] = useState('');
   const [createdLink, setCreatedLink] = useState<{ id: string; slug: string } | null>(null);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  const [selectedPlacements, setSelectedPlacements] = useState<string[]>([]);
+  const [customPlacement, setCustomPlacement] = useState('');
+  const [placementsCreated, setPlacementsCreated] = useState(false);
+
+  const placementOptions = [
+    { value: 'description', label: 'YouTube Description' },
+    { value: 'pinned', label: 'Pinned Comment' },
+    { value: 'bio', label: 'Bio' },
+    { value: 'short', label: 'Short' },
+    { value: 'video', label: 'Video' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  const togglePlacement = (value: string) => {
+    setSelectedPlacements((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((v) => v !== value);
+      } else {
+        return [...prev, value];
+      }
+    });
+  };
 
   const sanitizeSlug = (value: string): string => {
     return value
@@ -129,6 +151,47 @@ export function NewLinkPage() {
     setTimeout(() => setCopiedLink(null), 2000);
   };
 
+  const createPlacementsForLink = async (linkId: string) => {
+    if (selectedPlacements.length === 0) return;
+
+    try {
+      const placementPromises = selectedPlacements.map(async (placement) => {
+        let placementName = placementOptions.find((p) => p.value === placement)?.label || placement;
+        let placementType = placement;
+
+        if (placement === 'other' && customPlacement.trim()) {
+          placementName = customPlacement.trim();
+        }
+
+        const generateSourceCode = () => {
+          const timestamp = Date.now().toString(36);
+          const random = Math.random().toString(36).substring(2, 5);
+          return `${placementType.charAt(0)}_${timestamp}${random}`;
+        };
+
+        const response = await fetch('/api/placements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            link_id: linkId,
+            name: placementName,
+            type: placementType,
+            source_code: generateSourceCode(),
+          }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to create placement:', placement);
+        }
+      });
+
+      await Promise.all(placementPromises);
+      setPlacementsCreated(true);
+    } catch (error) {
+      console.error('Error creating placements:', error);
+    }
+  };
+
   // Debounced slug availability check
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -200,6 +263,9 @@ export function NewLinkPage() {
         title: title || undefined,
       });
 
+      // Create placements for selected options
+      await createPlacementsForLink(newLink.id);
+
       setCreatedLink({ id: newLink.id, slug: finalSlug });
     } catch (error: any) {
       setError(error.message || 'Failed to create link');
@@ -215,7 +281,12 @@ export function NewLinkPage() {
           <div className="space-y-6">
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-bold text-white">Link Created!</h1>
-              <p className="text-gray-400 mt-2">Your link is ready to use</p>
+              <p className="text-gray-400 mt-2">
+                {placementsCreated ? 'Link created and tracking started' : 'Your link is ready to use'}
+              </p>
+              {placementsCreated && (
+                <p className="text-sm text-gray-500 mt-1">You can add more placements anytime</p>
+              )}
             </div>
 
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 space-y-4">
@@ -271,6 +342,9 @@ export function NewLinkPage() {
                   setTitle('');
                   setSlug('');
                   setSlugError('');
+                  setSelectedPlacements([]);
+                  setCustomPlacement('');
+                  setPlacementsCreated(false);
                 }}
                 className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
               >
@@ -299,6 +373,40 @@ export function NewLinkPage() {
               className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Where will you use this link?
+            </label>
+            <p className="text-xs text-gray-500 mb-3">Select one or more to start tracking performance</p>
+            <div className="flex flex-wrap gap-2">
+              {placementOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => togglePlacement(option.value)}
+                  className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
+                    selectedPlacements.includes(option.value)
+                      ? 'bg-blue-600 border-blue-500 text-white'
+                      : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            {selectedPlacements.includes('other') && (
+              <div className="mt-3">
+                <input
+                  type="text"
+                  value={customPlacement}
+                  onChange={(e) => setCustomPlacement(e.target.value)}
+                  placeholder="Custom placement name"
+                  className="w-full px-4 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            )}
           </div>
 
           <div>

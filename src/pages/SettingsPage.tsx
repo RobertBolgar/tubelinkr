@@ -82,60 +82,62 @@ export function SettingsPage() {
   return (
     <Layout>
       <div className="min-h-screen bg-gray-950 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-8">Settings</h1>
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Your Profile</h1>
+          <p className="text-gray-400 mt-2">Manage your account</p>
+        </div>
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Username</h2>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={loading}
+                  className="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:opacity-50"
+                  placeholder="Enter new username"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  3-30 characters, letters, numbers, underscores, and hyphens only
+                </p>
+              </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Username</h2>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+              {error && (
+                <div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="bg-green-900/20 border border-green-800 text-green-400 px-4 py-3 rounded-lg text-sm">
+                  Username updated successfully!
+                </div>
+              )}
+
+              <button
+                type="submit"
                 disabled={loading}
-                className="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:opacity-50"
-                placeholder="Enter new username"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                3-30 characters, letters, numbers, underscores, and hyphens only
+                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+              >
+                {loading ? 'Updating...' : 'Update Username'}
+              </button>
+            </form>
+
+            <div className="mt-6 pt-6 border-t border-gray-800">
+              <p className="text-sm text-gray-400">
+                <strong>Note:</strong> Your username is used in your public links (e.g., tubelinkr.com/{user.username}/slug). Changing your username will change your public link URLs, but your existing links will still work.
               </p>
             </div>
-
-            {error && (
-              <div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="bg-green-900/20 border border-green-800 text-green-400 px-4 py-3 rounded-lg text-sm">
-                Username updated successfully!
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
-            >
-              {loading ? 'Updating...' : 'Update Username'}
-            </button>
-          </form>
-
-          <div className="mt-6 pt-6 border-t border-gray-800">
-            <p className="text-sm text-gray-400">
-              <strong>Note:</strong> Your username is used in your public links (e.g., tubelinkr.com/{user.username}/slug). Changing your username will change your public link URLs, but your existing links will still work.
-            </p>
           </div>
         </div>
       </div>
-    </div>
     </Layout>
   );
 }

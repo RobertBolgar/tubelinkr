@@ -80,7 +80,7 @@ export function AddPlacementModal({ isOpen, onClose, onAdd }: AddPlacementModalP
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-              Where you used it (name)
+              Where did you use this link?
             </label>
             <input
               id="name"
@@ -89,7 +89,7 @@ export function AddPlacementModal({ isOpen, onClose, onAdd }: AddPlacementModalP
               onChange={(e) => setName(e.target.value)}
               disabled={loading}
               className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-              placeholder="e.g., Stanley Curl Test"
+              placeholder="e.g. YouTube description, pinned comment, bio"
               maxLength={50}
             />
             <p className="mt-1 text-xs text-gray-500">Custom label to identify where you placed this link</p>

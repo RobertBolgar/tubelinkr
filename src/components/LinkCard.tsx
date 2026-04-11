@@ -107,14 +107,22 @@ export function LinkCard({ link, username, onToggleStatus, onAddPlacement, onVie
         {/* Action buttons */}
         <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-800">
           <button
-            onClick={() => onAddPlacement(link.id)}
+            type="button"
+            onClick={() => {
+              console.log('Track new placement clicked for link:', link.id);
+              onAddPlacement(link.id);
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
             Track new placement
           </button>
           <button
-            onClick={() => onViewPlacements(link.id)}
+            type="button"
+            onClick={() => {
+              console.log('View performance clicked for link:', link.id);
+              onViewPlacements(link.id);
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
           >
             <List className="w-4 h-4" />
@@ -122,12 +130,17 @@ export function LinkCard({ link, username, onToggleStatus, onAddPlacement, onVie
           </button>
           <Link
             to={`/links/${link.id}/edit`}
+            onClick={() => console.log('Edit Link clicked for link:', link.id, 'navigating to:', `/links/${link.id}/edit`)}
             className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
           >
             Edit Link
           </Link>
           <button
-            onClick={() => onToggleStatus(link.id, link.is_active)}
+            type="button"
+            onClick={() => {
+              console.log('Toggle status clicked for link:', link.id, 'current status:', link.is_active);
+              onToggleStatus(link.id, link.is_active);
+            }}
             className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
           >
             {link.is_active ? 'Deactivate' : 'Activate'}

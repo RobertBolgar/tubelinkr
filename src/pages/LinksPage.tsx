@@ -64,11 +64,13 @@ export function LinksPage() {
   };
 
   const toggleLinkStatus = async (linkId: string, currentStatus: boolean) => {
+    console.log('toggleLinkStatus called with linkId:', linkId, 'currentStatus:', currentStatus);
     try {
+      console.log('Calling db.updateLink with:', linkId, { is_active: !currentStatus });
       await db.updateLink(linkId, { 
         is_active: !currentStatus
       });
-
+      console.log('db.updateLink successful, fetching links');
       fetchLinks();
     } catch (error) {
       console.error('Error toggling link status:', error);
@@ -76,6 +78,7 @@ export function LinksPage() {
   };
 
   const handleAddPlacement = (linkId: string) => {
+    console.log('handleAddPlacement called with linkId:', linkId);
     setSelectedLinkId(linkId);
     setShowAddModal(true);
   };
@@ -100,6 +103,7 @@ export function LinksPage() {
   };
 
   const handleViewPlacements = (linkId: string) => {
+    console.log('handleViewPlacements called with linkId:', linkId, 'navigating to:', `/links/${linkId}/placements`);
     window.location.href = `/links/${linkId}/placements`;
   };
 

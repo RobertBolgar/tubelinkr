@@ -38,6 +38,7 @@ export function DashboardPage() {
     mostRecentClick: null,
   });
   const [loading, setLoading] = useState(true);
+  const [placementMap, setPlacementMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchDashboardStats();
@@ -58,6 +59,26 @@ export function DashboardPage() {
 
       let sourceData: Array<{ source: string | null; clicks: number }> = [];
       let mostRecentClick: { linkTitle: string; linkSlug: string; timestamp: string } | null = null;
+
+      // Fetch placements to map source codes to names
+      const newPlacementMap: Record<string, string> = {};
+      if (linkIds.length > 0) {
+        try {
+          // Fetch placements for all links
+          const placementPromises = linkIds.map(linkId => 
+            fetch(`/api/placements?link_id=${linkId}`)
+              .then(res => res.ok ? res.json() : [])
+              .catch(() => [])
+          );
+          const allPlacements = await Promise.all(placementPromises);
+          allPlacements.flat().forEach((p: { source_code: string; name: string }) => {
+            newPlacementMap[p.source_code] = p.name;
+          });
+          setPlacementMap(newPlacementMap);
+        } catch (error) {
+          console.error('Error fetching placements:', error);
+        }
+      }
 
       if (linkIds.length > 0) {
         const response = await db.getClickEventsByLinkIds(linkIds);
@@ -123,6 +144,16 @@ export function DashboardPage() {
     return sorted[0];
   };
 
+  const formatSourceLabelWithPlacements = (source: string | null) => {
+    if (!source) return 'Direct';
+    // Check if source code has a placement name
+    if (placementMap[source]) {
+      return placementMap[source];
+    }
+    // Fallback to original formatSourceLabel
+    return formatSourceLabel(source);
+  };
+
   const getAverageClicksPerLink = () => {
     if (stats.totalLinks === 0) return 0;
     return (stats.totalClicks / stats.totalLinks).toFixed(1);
@@ -166,7 +197,7 @@ export function DashboardPage() {
             'Video 1': 'Your video content is effective',
           };
           
-          const suggestion = suggestions[formatSourceLabel(bestSource.source)] || 'Keep using this placement';
+          const suggestion = suggestions[formatSourceLabelWithPlacements(bestSource.source)] || 'Keep using this placement';
           
           return (
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-4 sm:p-5 mb-5 sm:mb-6 shadow-lg">
@@ -182,7 +213,7 @@ export function DashboardPage() {
                 <div className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/30">
                   <div className="text-xs text-gray-400 mb-1">📊 Top Source</div>
                   <div className="text-white font-semibold text-sm">
-                    {formatSourceLabel(bestSource.source)} ({bestSourcePercent}%)
+                    {formatSourceLabelWithPlacements(bestSource.source)} ({bestSourcePercent}%)
                   </div>
                 </div>
                 <div className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/30">
@@ -201,7 +232,7 @@ export function DashboardPage() {
           
           const sortedSources = [...stats.sourceData].sort((a, b) => b.clicks - a.clicks);
           const topSource = sortedSources[0];
-          const topSourceLabel = formatSourceLabel(topSource.source);
+          const topSourceLabel = formatSourceLabelWithPlacements(topSource.source);
           const topSourcePercent = Math.round((topSource.clicks / totalSourceClicks) * 100);
           
           return (
@@ -221,7 +252,7 @@ export function DashboardPage() {
                       <div className="flex items-center justify-between text-xs sm:text-sm">
                         <div className="flex items-center gap-2">
                           <span className="text-gray-500 font-mono">#{index + 1}</span>
-                          <span className="text-gray-300 font-medium">{formatSourceLabel(source.source)}</span>
+                          <span className="text-gray-300 font-medium">{formatSourceLabelWithPlacements(source.source)}</span>
                         </div>
                         <span className="text-white font-semibold">{percent}%</span>
                       </div>
@@ -315,7 +346,7 @@ export function DashboardPage() {
                       <h3 className="text-xs sm:text-sm font-bold text-white">Best Source</h3>
                       <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                     </div>
-                    <div className="text-white font-semibold text-sm mb-1">{formatSourceLabel(bestSource.source)}</div>
+                    <div className="text-white font-semibold text-sm mb-1">{formatSourceLabelWithPlacements(bestSource.source)}</div>
                     <div className="text-lg sm:text-xl font-bold text-white mb-1">{bestSource.clicks} clicks</div>
                     <div className="text-xs text-gray-500">Best placement</div>
                   </div>

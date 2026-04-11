@@ -13,7 +13,7 @@ export async function onRequest(context) {
     
     try {
       const { results } = await env.DB.prepare(
-        `SELECT id, user_id, slug, original_url, title, created_at, updated_at, is_active 
+        `SELECT id, user_id, slug, original_url, title, created_at, updated_at, is_active, placement_count 
          FROM links WHERE user_id = ? AND is_active = 1 ORDER BY created_at DESC`
       ).bind(userId).all();
       
@@ -56,7 +56,7 @@ export async function onRequest(context) {
       
       return new Response(JSON.stringify({
         success: true,
-        data: { id: result.meta.last_row_id, user_id, slug, original_url, title, is_active: 1 }
+        data: { id: result.meta.last_row_id, user_id, slug, original_url, title, is_active: 1, placement_count: 0 }
       }), {
         headers: { 'Content-Type': 'application/json' },
       });

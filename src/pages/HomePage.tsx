@@ -11,11 +11,11 @@ export function HomePage() {
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-            See exactly where your clicks come from — description, pinned comment, or bio — and double down on what works.
+            See exactly which placements drive clicks — and double down on what works.
           </p>
 
           <p className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto">
-            Built for YouTube creators who care about real performance, not just pretty links.
+            Built for YouTube creators optimizing their description, pinned comments, and bio links.
           </p>
 
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 sm:p-8 max-w-2xl mx-auto">
@@ -44,10 +44,10 @@ export function HomePage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Flame className="w-3.5 h-3.5 text-orange-500" />
-                        <span className="text-sm text-gray-300">Description</span>
+                        <Flame className="w-4 h-4 text-orange-500" />
+                        <span className="text-sm font-semibold text-white">Description</span>
                       </div>
-                      <span className="text-sm font-semibold text-white">62%</span>
+                      <span className="text-base font-bold text-white">62%</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -76,16 +76,20 @@ export function HomePage() {
 
           <div className="bg-gray-900/50 border border-gray-800/50 rounded-lg px-4 py-3 max-w-xl mx-auto">
             <p className="text-sm text-gray-400">
-              Most creators have no idea which link placement actually works.
+              Most creators are optimizing the wrong link placement.
             </p>
           </div>
+
+          <p className="text-sm text-gray-500 pt-2">
+            Find your best-performing placement in under 30 seconds.
+          </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-2">
             <Link
               to="/signup"
               className="px-6 sm:px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-center"
             >
-              Start tracking your links
+              Create your first tracked link
             </Link>
             <Link
               to="/login"

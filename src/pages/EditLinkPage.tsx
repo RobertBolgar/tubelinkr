@@ -13,7 +13,6 @@ export function EditLinkPage() {
   const [originalUrl, setOriginalUrl] = useState('');
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [isActive, setIsActive] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -44,7 +43,6 @@ export function EditLinkPage() {
       setOriginalUrl(link.original_url);
       setTitle(link.title || '');
       setSlug(link.slug);
-      setIsActive(link.is_active);
       setFetchLoading(false);
     } catch (error) {
       console.error('Error fetching link:', error);
@@ -106,7 +104,6 @@ export function EditLinkPage() {
         original_url: originalUrl,
         title: title || null,
         slug: slug,
-        is_active: isActive,
       });
 
       navigate('/links');
@@ -114,6 +111,19 @@ export function EditLinkPage() {
       setError(error.message || 'Failed to update link');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this link? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await db.updateLink(id!, { is_active: false });
+      navigate('/links');
+    } catch (error: any) {
+      setError(error.message || 'Failed to delete link');
     }
   };
 
@@ -204,23 +214,6 @@ export function EditLinkPage() {
             </div>
           </div>
 
-          <div>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-                className="w-5 h-5 bg-gray-900 border border-gray-800 rounded text-blue-600 focus:ring-2 focus:ring-blue-600"
-              />
-              <div>
-                <div className="text-sm font-medium text-gray-300">Active</div>
-                <div className="text-xs text-gray-500">
-                  Inactive links will show a not-found page
-                </div>
-              </div>
-            </label>
-          </div>
-
           <div className="flex flex-col sm:flex-row gap-4">
             <button
               type="button"
@@ -235,6 +228,16 @@ export function EditLinkPage() {
               className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
             >
               {loading ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+
+          <div className="pt-4 border-t border-gray-800">
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="w-full py-3 px-4 bg-red-900/20 hover:bg-red-900/30 text-red-400 border border-red-800 font-medium rounded-lg transition-colors"
+            >
+              Delete Link
             </button>
           </div>
         </form>

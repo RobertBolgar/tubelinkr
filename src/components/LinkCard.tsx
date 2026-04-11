@@ -131,9 +131,9 @@ export function LinkCard({ link, username, onToggleStatus, onAddPlacement, onVie
           <button
             type="button"
             onClick={() => onToggleStatus(link.id, link.is_active)}
-            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
+            className="px-4 py-2 bg-red-900/20 hover:bg-red-900/30 text-red-400 border border-red-800 text-sm font-medium rounded-lg transition-colors"
           >
-            {link.is_active ? 'Deactivate' : 'Activate'}
+            Delete Link
           </button>
         </div>
       </div>

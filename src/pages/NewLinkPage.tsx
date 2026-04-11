@@ -152,7 +152,13 @@ export function NewLinkPage() {
   };
 
   const createPlacementsForLink = async (linkId: string) => {
-    if (selectedPlacements.length === 0) return;
+    console.log('createPlacementsForLink called with linkId:', linkId);
+    console.log('selectedPlacements:', selectedPlacements);
+    
+    if (selectedPlacements.length === 0) {
+      console.log('No placements selected, skipping creation');
+      return;
+    }
 
     try {
       const placementPromises = selectedPlacements.map(async (placement) => {
@@ -169,6 +175,9 @@ export function NewLinkPage() {
           return `${placementType.charAt(0)}_${timestamp}${random}`;
         };
 
+        const sourceCode = generateSourceCode();
+        console.log('Creating placement:', { linkId, name: placementName, type: placementType, sourceCode });
+
         const response = await fetch('/api/placements', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -176,17 +185,30 @@ export function NewLinkPage() {
             link_id: linkId,
             name: placementName,
             type: placementType,
-            source_code: generateSourceCode(),
+            source_code: sourceCode,
           }),
         });
 
+        console.log('Placement API response status:', response.status);
+        
         if (!response.ok) {
-          console.error('Failed to create placement:', placement);
+          const errorText = await response.text();
+          console.error('Failed to create placement:', placement, 'Status:', response.status, 'Error:', errorText);
+          return null;
         }
+        
+        const data = await response.json();
+        console.log('Placement created successfully:', data);
+        return data;
       });
 
-      await Promise.all(placementPromises);
-      setPlacementsCreated(true);
+      const results = await Promise.all(placementPromises);
+      console.log('All placement creation results:', results);
+      
+      const successfulPlacements = results.filter(r => r !== null);
+      if (successfulPlacements.length > 0) {
+        setPlacementsCreated(true);
+      }
     } catch (error) {
       console.error('Error creating placements:', error);
     }
@@ -263,10 +285,16 @@ export function NewLinkPage() {
         title: title || undefined,
       });
 
-      // Create placements for selected options
-      await createPlacementsForLink(newLink.id);
+      // Extract the actual link data from the API response
+      const linkData = newLink.data || newLink;
+      const linkId = linkData.id;
 
-      setCreatedLink({ id: newLink.id, slug: finalSlug });
+      console.log('Link created successfully, ID:', linkId);
+
+      // Create placements for selected options
+      await createPlacementsForLink(linkId);
+
+      setCreatedLink({ id: linkId, slug: finalSlug });
     } catch (error: any) {
       setError(error.message || 'Failed to create link');
     } finally {

@@ -58,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         created_at: syncedUser.created_at,
         updated_at: syncedUser.updated_at,
         is_active: syncedUser.is_active,
+        username_confirmed_by_user: syncedUser.username_confirmed_by_user,
       });
     }
   };
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             created_at: syncedUser.created_at,
             updated_at: syncedUser.updated_at,
             is_active: syncedUser.is_active,
+            username_confirmed_by_user: syncedUser.username_confirmed_by_user,
           });
         }
       } else {

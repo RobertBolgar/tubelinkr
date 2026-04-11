@@ -5,7 +5,7 @@ import { Layout } from '../components/Layout';
 import { Check, AlertCircle } from 'lucide-react';
 
 export function OnboardingPage() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
@@ -75,6 +75,9 @@ export function OnboardingPage() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to confirm username');
       }
+      
+      // Refresh user context to get updated username_confirmed_by_user
+      await refreshUser();
       
       // Redirect to dashboard after successful onboarding
       navigate('/dashboard');

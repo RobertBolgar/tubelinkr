@@ -19,21 +19,31 @@ export function EditLinkPage() {
   const [fetchLoading, setFetchLoading] = useState(true);
   const [slugChanged, setSlugChanged] = useState(false);
 
+  console.log('EditLinkPage rendered with id:', id);
+
   useEffect(() => {
+    console.log('EditLinkPage useEffect triggered, fetching link with id:', id);
     fetchLink();
   }, [id]);
 
   const fetchLink = async () => {
-    if (!id) return;
+    if (!id) {
+      console.log('fetchLink: No id provided');
+      return;
+    }
 
+    console.log('fetchLink: Fetching link with id:', id);
     try {
       const link = await db.getLinkById(id);
+      console.log('fetchLink: Received link data:', link);
       
       if (!link || link.user_id !== user?.id) {
+        console.log('fetchLink: Link not found or user mismatch, navigating to /links');
         navigate('/links');
         return;
       }
 
+      console.log('fetchLink: Link found, setting state');
       setLink(link);
       setOriginalUrl(link.original_url);
       setTitle(link.title || '');
@@ -41,7 +51,7 @@ export function EditLinkPage() {
       setIsActive(link.is_active);
       setFetchLoading(false);
     } catch (error) {
-      console.error('Error fetching link:', error);
+      console.error('fetchLink: Error fetching link:', error);
       navigate('/links');
     }
   };
@@ -65,6 +75,8 @@ export function EditLinkPage() {
     e.preventDefault();
     setError('');
 
+    console.log('handleSubmit called with:', { id, originalUrl, title, slug, isActive });
+
     if (!originalUrl) {
       setError('Original URL is required');
       return;
@@ -86,25 +98,30 @@ export function EditLinkPage() {
 
     try {
       if (slugChanged) {
+        console.log('Checking for existing links with slug:', slug);
         const existingLinks = await db.getLinksByUserId(user!.id);
         const existingLink = existingLinks.find((l) => l.slug === slug && l.id !== id);
 
         if (existingLink) {
+          console.log('Slug already exists, showing error');
           setError('A link with this slug already exists');
           setLoading(false);
           return;
         }
       }
 
+      console.log('Calling db.updateLink with:', id!, { original_url: originalUrl, title: title || null, slug, is_active: isActive });
       await db.updateLink(id!, {
         original_url: originalUrl,
         title: title || null,
         slug: slug,
         is_active: isActive,
       });
+      console.log('db.updateLink successful, navigating to /links');
 
       navigate('/links');
     } catch (error: any) {
+      console.error('handleSubmit error:', error);
       setError(error.message || 'Failed to update link');
     } finally {
       setLoading(false);

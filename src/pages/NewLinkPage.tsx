@@ -310,37 +310,20 @@ export function NewLinkPage() {
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-bold text-white">Link Created!</h1>
               <p className="text-gray-400 mt-2">
-                {placementsCreated ? 'Link created and tracking started' : 'Your link is ready to use'}
+                Your link is ready to use
               </p>
-              {placementsCreated && (
-                <p className="text-sm text-gray-500 mt-1">You can add more placements anytime</p>
-              )}
+              <p className="text-sm text-gray-500 mt-1">
+                We'll track which placement performs best.
+              </p>
             </div>
 
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Tracking Link (Internal)
-                </label>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 min-w-0 px-4 py-3 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-400 font-mono break-all">
-                    {window.location.origin}/api/redirect/{createdLink.id}/{createdLink.slug}?source=d
-                  </div>
-                  <button
-                    onClick={() => copyToClipboard('tracking', `${window.location.origin}/api/redirect/${createdLink.id}/${createdLink.slug}?source=d`)}
-                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex-shrink-0"
-                  >
-                    {copiedLink === 'tracking' ? 'Copied!' : 'Copy'}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Public Link (Live)
                 </label>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 min-w-0 px-4 py-3 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-400 font-mono break-all">
+                  <div className="flex-1 min-w-0 px-4 py-3 bg-gray-950 border border-blue-800 rounded-lg text-sm text-blue-400 font-mono break-all">
                     https://go.tubelinkr.com/{user?.username}/{createdLink.slug}
                   </div>
                   <button
@@ -351,10 +334,28 @@ export function NewLinkPage() {
                   </button>
                 </div>
                 <p className="mt-2 text-xs text-gray-500">
-                  Share this branded URL anywhere
+                  Paste this into your video description, pinned comment, or bio.
                 </p>
               </div>
             </div>
+
+            {placementsCreated && selectedPlacements.length > 0 && (
+              <div className="bg-gray-900/50 border border-gray-800/50 rounded-lg px-4 py-3">
+                <p className="text-sm font-medium text-gray-400 mb-2">
+                  Tracking started for:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedPlacements.map((placement) => {
+                    const option = placementOptions.find((p) => p.value === placement);
+                    return (
+                      <span key={placement} className="px-3 py-1 text-xs bg-gray-800 text-gray-300 rounded">
+                        {option?.label || placement}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button

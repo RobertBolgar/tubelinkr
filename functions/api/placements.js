@@ -121,6 +121,13 @@ export async function onRequest(context) {
           .replace(/^-|-$/g, '');
       }
       
+      // Fallback if public_code is empty after slugification
+      if (!public_code) {
+        public_code = 'placement';
+      }
+      
+      console.log('Placement creation details:', { link_id, name, type, source_code, generated_public_code: public_code });
+      
       // Ensure public_code is unique for this link, append suffix if needed
       let final_public_code = public_code;
       let suffix = 1;
@@ -129,11 +136,15 @@ export async function onRequest(context) {
           'SELECT id FROM placements WHERE link_id = ? AND public_code = ?'
         ).bind(link_id, final_public_code).first();
         
+        console.log('Checking public_code uniqueness:', final_public_code, 'exists:', !!existingPublicCode);
+        
         if (!existingPublicCode) break;
         
         suffix++;
         final_public_code = `${public_code}-${suffix}`;
       }
+      
+      console.log('Final public_code for insert:', final_public_code);
       
       // Create placement
       const result = await env.DB.prepare(

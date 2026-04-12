@@ -3,16 +3,20 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const pathParts = url.pathname.split('/');
   
-  // Expected formats:
-  // - /api/redirect/{userId}/{slug} (base link)
-  // - /api/redirect/{userId}/{slug}/{trackingCode} (placement link)
-  if (pathParts.length < 4) {
+  console.log('Path parts:', pathParts);
+  
+  // Expected formats for public URLs:
+  // - /{userId}/{slug} (base link)
+  // - /{userId}/{slug}/{publicCode} (placement link)
+  if (pathParts.length < 3) {
     return new Response('Invalid redirect URL', { status: 400 });
   }
   
-  const userId = pathParts[3];
-  const slug = pathParts[4];
-  const trackingCode = pathParts[5] || null; // Optional path-based tracking code
+  const userId = pathParts[1];
+  const slug = pathParts[2];
+  const trackingCode = pathParts[3] || null; // Optional path-based tracking code
+  
+  console.log('Parsed values:', { userId, slug, trackingCode });
   
   try {
     console.log('Redirect request:', { userId, slug, trackingCode });
@@ -31,10 +35,13 @@ export async function onRequest(context) {
     // Get source from query parameter (backward compatibility) or path-based tracking code
     let source = url.searchParams.get('source');
     if (trackingCode) {
+      console.log('Looking up placement by public_code:', trackingCode, 'for link_id:', link.id);
       // Check if trackingCode is a public_code (new format) or source_code (old format)
       const placement = await env.DB.prepare(
         'SELECT source_code FROM placements WHERE link_id = ? AND public_code = ?'
       ).bind(link.id, trackingCode).first();
+      
+      console.log('Placement lookup result:', placement);
       
       if (placement) {
         // Use the source_code from the placement for tracking
@@ -43,9 +50,12 @@ export async function onRequest(context) {
       } else {
         // Fallback to using trackingCode as source_code (backward compatibility)
         source = trackingCode;
+        console.log('Placement not found by public_code, using trackingCode as source:', source);
       }
     }
     const normalizedSource = source ? source.toLowerCase().trim() : 'direct';
+    
+    console.log('Final source for click recording:', normalizedSource);
     
     // Record click event
     const now = new Date().toISOString();

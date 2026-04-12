@@ -27,7 +27,7 @@ export async function onRequest(context) {
     
     // Get source from query parameter
     const source = url.searchParams.get('source');
-    const normalizedSource = source ? source.toLowerCase().trim() : null;
+    const normalizedSource = source ? source.toLowerCase().trim() : 'direct';
     
     // Record click event
     const now = new Date().toISOString();

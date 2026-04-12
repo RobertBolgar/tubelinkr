@@ -35,6 +35,25 @@ export async function onRequest(context) {
         })
       );
       
+      // Add virtual "Direct" placement for clicks with no source
+      const directClickCount = await env.DB.prepare(
+        `SELECT COUNT(*) as count FROM click_events 
+         WHERE link_id = ? AND source = 'direct'`
+      ).bind(linkId).first();
+      
+      if (directClickCount && directClickCount.count > 0) {
+        placementsWithClicks.push({
+          id: -1,
+          link_id: parseInt(linkId),
+          name: 'Direct',
+          type: 'direct',
+          source_code: 'direct',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          clicks: directClickCount.count
+        });
+      }
+      
       return new Response(JSON.stringify(placementsWithClicks), {
         headers: { 'Content-Type': 'application/json' },
       });

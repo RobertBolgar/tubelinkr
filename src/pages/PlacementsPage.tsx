@@ -119,6 +119,7 @@ export function PlacementsPage() {
       short: 'Short',
       video: 'Video',
       other: 'Other',
+      direct: 'Direct',
     };
     return labels[type] || type;
   };
@@ -210,26 +211,30 @@ export function PlacementsPage() {
                         <div className="text-sm text-gray-400 font-mono">{placement.source_code}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => copyPlacementUrl(placement)}
-                            className="p-2 text-gray-400 hover:text-white transition-colors"
-                            title="Copy tracking link"
-                          >
-                            {copiedId === placement.id ? (
-                              <CheckCircle2 className="w-4 h-4 text-green-500" />
-                            ) : (
-                              <Copy className="w-4 h-4" />
-                            )}
-                          </button>
-                          <button
-                            onClick={() => handleDeletePlacement(placement.id)}
-                            className="p-2 text-gray-400 hover:text-red-400 transition-colors"
-                            title="Delete placement"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                        {placement.type === 'direct' ? (
+                          <div className="text-sm text-gray-500 italic">Virtual placement</div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => copyPlacementUrl(placement)}
+                              className="p-2 text-gray-400 hover:text-white transition-colors"
+                              title="Copy tracking link"
+                            >
+                              {copiedId === placement.id ? (
+                                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </button>
+                            <button
+                              onClick={() => handleDeletePlacement(placement.id)}
+                              className="p-2 text-gray-400 hover:text-red-400 transition-colors"
+                              title="Delete placement"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}

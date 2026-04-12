@@ -80,7 +80,7 @@ export async function onRequest(context) {
       const result = await env.DB.prepare(
         `INSERT INTO click_events (link_id, timestamp, referrer, user_agent, ip_hash, source) 
            VALUES (?, ?, ?, ?, ?, ?)`
-      ).bind(link_id, now, referrer || null, user_agent || null, ip_hash || null, source || null).run();
+      ).bind(link_id, now, referrer || null, user_agent || null, ip_hash || null, source || 'direct').run();
       
       console.log('Click event recorded:', { link_id, result });
       

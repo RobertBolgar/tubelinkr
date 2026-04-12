@@ -12,19 +12,30 @@ export async function onRequest(context) {
     return new Response('Invalid redirect URL', { status: 400 });
   }
   
-  const userId = pathParts[1];
+  const username = pathParts[1];
   const slug = pathParts[2];
   const trackingCode = pathParts[3] || null; // Optional path-based tracking code
   
-  console.log('Parsed values:', { userId, slug, trackingCode });
+  console.log('Parsed values:', { username, slug, trackingCode });
   
   try {
-    console.log('Redirect request:', { userId, slug, trackingCode });
+    console.log('Redirect request:', { username, slug, trackingCode });
     
-    // Find the link
+    // First, find the user by username to get the numeric user_id
+    const user = await env.DB.prepare(
+      'SELECT id FROM users WHERE username = ? AND is_active = 1'
+    ).bind(username).first();
+    
+    console.log('Found user:', user);
+    
+    if (!user) {
+      return new Response('User not found', { status: 404 });
+    }
+    
+    // Find the link by numeric user_id and slug
     const link = await env.DB.prepare(
       'SELECT id, original_url FROM links WHERE user_id = ? AND slug = ? AND is_active = 1'
-    ).bind(userId, slug).first();
+    ).bind(user.id, slug).first();
     
     console.log('Found link:', link);
     
@@ -38,7 +49,7 @@ export async function onRequest(context) {
       console.log('Looking up placement by public_code:', trackingCode, 'for link_id:', link.id);
       // Check if trackingCode is a public_code (new format) or source_code (old format)
       const placement = await env.DB.prepare(
-        'SELECT source_code FROM placements WHERE link_id = ? AND public_code = ?'
+        'SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND public_code = ?'
       ).bind(link.id, trackingCode).first();
       
       console.log('Placement lookup result:', placement);
@@ -46,7 +57,7 @@ export async function onRequest(context) {
       if (placement) {
         // Use the source_code from the placement for tracking
         source = placement.source_code;
-        console.log('Found placement by public_code, using source_code:', source);
+        console.log('Found placement by public_code, using source_code:', source, 'from placement_id:', placement.id);
       } else {
         // Fallback to using trackingCode as source_code (backward compatibility)
         source = trackingCode;
@@ -55,7 +66,7 @@ export async function onRequest(context) {
     }
     const normalizedSource = source ? source.toLowerCase().trim() : 'direct';
     
-    console.log('Final source for click recording:', normalizedSource);
+    console.log('Final source for click recording:', normalizedSource, 'original source:', source);
     
     // Record click event
     const now = new Date().toISOString();

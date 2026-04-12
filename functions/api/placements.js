@@ -38,7 +38,7 @@ export async function onRequest(context) {
       // Add virtual "Direct" placement for clicks with no source
       const directClickCount = await env.DB.prepare(
         `SELECT COUNT(*) as count FROM click_events 
-         WHERE link_id = ? AND source = 'direct'`
+         WHERE link_id = ? AND (source = 'direct' OR source IS NULL)`
       ).bind(linkId).first();
       
       if (directClickCount && directClickCount.count > 0) {

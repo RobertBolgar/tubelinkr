@@ -3,16 +3,19 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const pathParts = url.pathname.split('/');
   
-  // Expected format: /api/redirect/{userId}/{slug}
+  // Expected formats:
+  // - /api/redirect/{userId}/{slug} (base link)
+  // - /api/redirect/{userId}/{slug}/{trackingCode} (placement link)
   if (pathParts.length < 4) {
     return new Response('Invalid redirect URL', { status: 400 });
   }
   
   const userId = pathParts[3];
   const slug = pathParts[4];
+  const trackingCode = pathParts[5] || null; // Optional path-based tracking code
   
   try {
-    console.log('Redirect request:', { userId, slug });
+    console.log('Redirect request:', { userId, slug, trackingCode });
     
     // Find the link
     const link = await env.DB.prepare(
@@ -25,8 +28,12 @@ export async function onRequest(context) {
       return new Response('Link not found', { status: 404 });
     }
     
-    // Get source from query parameter
-    const source = url.searchParams.get('source');
+    // Get source from query parameter (backward compatibility) or path-based tracking code
+    let source = url.searchParams.get('source');
+    if (trackingCode) {
+      // Use path-based tracking code as source
+      source = trackingCode;
+    }
     const normalizedSource = source ? source.toLowerCase().trim() : 'direct';
     
     // Record click event

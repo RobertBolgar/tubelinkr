@@ -62,6 +62,17 @@ export async function onRequest(context) {
       });
     } catch (error) {
       console.error('Error creating link:', error);
+      
+      // Check for unique constraint violation (duplicate slug)
+      if (error.message && error.message.includes('UNIQUE constraint failed: links.user_id, links.slug')) {
+        return new Response(JSON.stringify({ 
+          error: 'This link slug is already in use. Please choose a different slug.' 
+        }), {
+          status: 409,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

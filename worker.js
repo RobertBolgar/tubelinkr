@@ -1,77 +1,169 @@
 /**
- * Cloudflare Worker for public branded links
- * Handles go.tubelinkr.com/{username}/{slug}?source={code}
+ * Cloudflare Worker for handling clean public redirect URLs
  * 
- * This Worker:
- * 1. Parses username and slug from the URL
- * 2. Looks up user by username to get userId
- * 3. Redirects internally to /api/redirect/{userId}/{slug}?source={code}
- * 4. Preserves all existing analytics and tracking logic
+ * This Worker handles:
+ * - /{username}/{slug} (base link)
+ * - /{username}/{slug}/{public_code} (placement link)
  * 
- * IMPORTANT: Replace MAIN_APP_ORIGIN with your main application domain
- * (e.g., https://tubelinkr.pages.dev or your custom domain)
+ * Deployed to: go.tubelinkr.com
  */
-
-const MAIN_APP_ORIGIN = 'https://tubelinkrgit.pages.dev'; // TODO: Replace with your actual main app domain
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const pathParts = url.pathname.split('/').filter(part => part.length > 0);
+    const pathParts = url.pathname.split('/');
     
-    // Expected format: /{username}/{slug}
-    if (pathParts.length < 2) {
-      return new Response('Not found', { status: 404 });
+    console.log('Path parts:', pathParts);
+    
+    // Expected formats:
+    // - /{username}/{slug} (base link)
+    // - /{username}/{slug}/{public_code} (placement link)
+    if (pathParts.length < 3) {
+      return new Response('Invalid redirect URL', { status: 400 });
     }
     
-    const username = pathParts[0];
-    const slug = pathParts[1];
+    const username = pathParts[1];
+    const slug = pathParts[2];
+    const public_code = pathParts[3] || null; // Optional path-based tracking code
     
-    console.log('=== Public Redirect Request ===');
-    console.log('Requested username:', username);
-    console.log('Requested slug:', slug);
-    console.log('Using MAIN_APP_ORIGIN:', MAIN_APP_ORIGIN);
+    console.log('=== PARSED VALUES ===');
+    console.log('Username:', username);
+    console.log('Slug:', slug);
+    console.log('Public code:', public_code);
+    console.log('=====================');
     
     try {
-      // Look up user by username - call main app's API
-      const userLookupUrl = `${MAIN_APP_ORIGIN}/api/users/${username}`;
-      console.log('User lookup URL:', userLookupUrl);
+      console.log('=== USER LOOKUP ===');
+      console.log('Query: SELECT id FROM users WHERE username = ? AND is_active = 1');
+      console.log('Parameter:', username);
       
-      const userResponse = await fetch(userLookupUrl);
+      // First, find the user by username to get the numeric user_id
+      const user = await env.DB.prepare(
+        'SELECT id FROM users WHERE username = ? AND is_active = 1'
+      ).bind(username).first();
       
-      if (!userResponse.ok) {
-        console.log('User not found:', username, 'Status:', userResponse.status);
+      console.log('User lookup result:', user);
+      console.log('User found:', !!user);
+      if (user) {
+        console.log('User ID:', user.id);
+      }
+      console.log('===================');
+      
+      if (!user) {
+        console.log('ERROR: User not found');
         return new Response('User not found', { status: 404 });
       }
       
-      const user = await userResponse.json();
+      console.log('=== LINK LOOKUP ===');
+      console.log('Query: SELECT id, original_url FROM links WHERE user_id = ? AND slug = ? AND is_active = 1');
+      console.log('Parameters:', user.id, slug);
       
-      if (!user || !user.id) {
-        console.log('Invalid user response:', user);
-        return new Response('User not found', { status: 404 });
+      // Find the link by numeric user_id and slug
+      const link = await env.DB.prepare(
+        'SELECT id, original_url FROM links WHERE user_id = ? AND slug = ? AND is_active = 1'
+      ).bind(user.id, slug).first();
+      
+      console.log('Link lookup result:', link);
+      console.log('Link found:', !!link);
+      if (link) {
+        console.log('Link ID:', link.id);
+        console.log('Link original_url:', link.original_url);
+      }
+      console.log('===================');
+      
+      if (!link) {
+        console.log('ERROR: Link not found');
+        return new Response('Link not found', { status: 404 });
       }
       
-      console.log('Resolved user ID:', user.id);
+      // Get source from query parameter (backward compatibility) or path-based tracking code
+      let source = url.searchParams.get('source');
       
-      // Build redirect URL to existing tracking endpoint on main app
-      const source = url.searchParams.get('source');
-      const redirectUrl = new URL(`${MAIN_APP_ORIGIN}/api/redirect/${user.id}/${slug}`);
+      console.log('=== PLACEMENT LOOKUP ===');
+      console.log('Query parameter source:', source);
+      console.log('Public code from path:', public_code);
       
-      if (source) {
-        redirectUrl.searchParams.set('source', source);
-        console.log('Source parameter:', source);
+      if (public_code) {
+        console.log('--- Lookup by public_code ---');
+        console.log('Query: SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND public_code = ?');
+        console.log('Parameters:', link.id, public_code);
+        
+        // Check if public_code is a public_code (new format) or source_code (old format)
+        const placement = await env.DB.prepare(
+          'SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND public_code = ?'
+        ).bind(link.id, public_code).first();
+        
+        console.log('Placement lookup by public_code result:', placement);
+        console.log('Placement found by public_code:', !!placement);
+        
+        if (placement) {
+          // Use the source_code from the placement for tracking
+          source = placement.source_code;
+          console.log('SUCCESS: Found placement by public_code');
+          console.log('Placement ID:', placement.id);
+          console.log('Placement source_code:', source);
+          console.log('Placement public_code:', placement.public_code);
+        } else {
+          // Try looking up by source_code for backward compatibility
+          console.log('--- Fallback: Lookup by source_code ---');
+          console.log('Query: SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND source_code = ?');
+          console.log('Parameters:', link.id, public_code);
+          
+          const placementBySourceCode = await env.DB.prepare(
+            'SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND source_code = ?'
+          ).bind(link.id, public_code).first();
+          
+          console.log('Placement lookup by source_code result:', placementBySourceCode);
+          console.log('Placement found by source_code:', !!placementBySourceCode);
+          
+          if (placementBySourceCode) {
+            source = placementBySourceCode.source_code;
+            console.log('SUCCESS: Found placement by source_code');
+            console.log('Placement ID:', placementBySourceCode.id);
+            console.log('Placement source_code:', source);
+            console.log('Placement public_code:', placementBySourceCode.public_code);
+          } else {
+            // Fallback to using public_code as source_code (backward compatibility)
+            source = public_code;
+            console.log('WARNING: Placement not found by either public_code or source_code');
+            console.log('Using public_code as source:', source);
+          }
+        }
+      } else {
+        console.log('No public_code in path, will use query parameter or direct');
       }
       
-      console.log('Final redirect URL:', redirectUrl.toString());
-      console.log('=== End Request ===');
+      const normalizedSource = source ? source.toLowerCase().trim() : 'direct';
       
-      // Redirect to the existing tracking endpoint
-      // This preserves all analytics logic
-      return Response.redirect(redirectUrl.toString(), 307);
+      console.log('=== FINAL SOURCE ===');
+      console.log('Original source:', source);
+      console.log('Normalized source:', normalizedSource);
+      console.log('=====================');
+      
+      // Record click event
+      const now = new Date().toISOString();
+      const referrer = request.headers.get('referer') || null;
+      const userAgent = request.headers.get('user-agent') || null;
+      const ipHash = request.headers.get('cf-connecting-ip') || null;
+      
+      try {
+        await env.DB.prepare(
+          `INSERT INTO click_events (link_id, timestamp, referrer, user_agent, ip_hash, source) 
+           VALUES (?, ?, ?, ?, ?, ?)`
+        ).bind(link.id, now, referrer, userAgent, ipHash, normalizedSource).run();
+        console.log('Click event recorded:', { linkId: link.id, source: normalizedSource });
+      } catch (clickError) {
+        console.error('Failed to record click:', clickError);
+        // Continue with redirect even if click recording fails
+      }
+      
+      // Redirect to original URL
+      console.log('Redirecting to:', link.original_url);
+      return Response.redirect(link.original_url, 302);
       
     } catch (error) {
-      console.error('Public redirect error:', error);
-      return new Response('Internal server error', { status: 500 });
+      console.error('Redirect error:', error);
+      return new Response('Internal server error: ' + error.message, { status: 500 });
     }
   }
 };

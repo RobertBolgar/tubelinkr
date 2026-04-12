@@ -1,0 +1,9 @@
+name = "tubelinkr-go"
+main = "worker.js"
+compatibility_date = "2024-04-07"
+
+# D1 database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "tubelinkr-db"
+database_id = "7fd2cd09-fafa-496f-8310-a7e86ca5c03c"

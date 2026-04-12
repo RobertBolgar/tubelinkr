@@ -158,9 +158,9 @@ async function handleLinksAPI(request, env, corsHeaders) {
 
   if (request.method === 'DELETE' && path.match(/^\/api\/links\/([^\/]+)$/)) {
     const linkId = path.match(/^\/api\/links\/([^\/]+)$/)[1];
-    const now = new Date().toISOString();
     
-    await env.DB.prepare(`UPDATE links SET is_active = 0, updated_at = ? WHERE id = ?`).bind(now, linkId).run();
+    // Delete the link (hard delete)
+    await env.DB.prepare(`DELETE FROM links WHERE id = ?`).bind(linkId).run();
     
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

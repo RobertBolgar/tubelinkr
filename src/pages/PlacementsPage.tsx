@@ -148,7 +148,7 @@ export function PlacementsPage() {
   };
 
   const copyPlacementUrl = (placement: Placement) => {
-    const url = `${PUBLIC_BASE_URL}/api/redirect/${linkInfo?.user_id}/${linkInfo?.slug}/${placement.public_code}`;
+    const url = `${PUBLIC_BASE_URL}/${linkInfo?.username}/${linkInfo?.slug}/${placement.public_code}`;
     navigator.clipboard.writeText(url);
     setCopiedId(placement.id);
     setTimeout(() => setCopiedId(null), 2000);

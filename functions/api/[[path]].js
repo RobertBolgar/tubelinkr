@@ -231,16 +231,19 @@ async function handleRedirectAPI(request, env, corsHeaders) {
   const path = url.pathname;
   const pathParts = path.split('/');
   
-  // Expected format: /api/redirect/{userId}/{slug}
+  // Expected formats:
+  // - /api/redirect/{userId}/{slug} (old format with numeric user_id)
+  // - /api/redirect/{userId}/{slug}/{trackingCode} (old format with tracking code)
   if (pathParts.length < 4) {
     return new Response('Invalid redirect URL', { status: 400, headers: corsHeaders });
   }
   
   const userId = pathParts[3];
   const slug = pathParts[4];
+  const trackingCode = pathParts[5] || null;
   
   try {
-    console.log('Redirect request:', { userId, slug });
+    console.log('Redirect request:', { userId, slug, trackingCode });
     
     // Find the link
     const link = await env.DB.prepare(
@@ -253,9 +256,43 @@ async function handleRedirectAPI(request, env, corsHeaders) {
       return new Response('Link not found', { status: 404, headers: corsHeaders });
     }
     
-    // Get source from query parameter
-    const source = url.searchParams.get('source');
-    const normalizedSource = source ? source.toLowerCase().trim() : null;
+    // Get source from query parameter (backward compatibility) or path-based tracking code
+    let source = url.searchParams.get('source');
+    if (trackingCode) {
+      console.log('Looking up placement by public_code:', trackingCode, 'for link_id:', link.id);
+      // Check if trackingCode is a public_code (new format) or source_code (old format)
+      const placement = await env.DB.prepare(
+        'SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND public_code = ?'
+      ).bind(link.id, trackingCode).first();
+      
+      console.log('Placement lookup result:', placement);
+      
+      if (placement) {
+        // Use the source_code from the placement for tracking
+        source = placement.source_code;
+        console.log('Found placement by public_code, using source_code:', source, 'from placement_id:', placement.id);
+      } else {
+        // Try looking up by source_code for backward compatibility
+        console.log('Placement not found by public_code, trying source_code lookup');
+        const placementBySourceCode = await env.DB.prepare(
+          'SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND source_code = ?'
+        ).bind(link.id, trackingCode).first();
+        
+        console.log('Placement lookup by source_code result:', placementBySourceCode);
+        
+        if (placementBySourceCode) {
+          source = placementBySourceCode.source_code;
+          console.log('Found placement by source_code, using source_code:', source, 'from placement_id:', placementBySourceCode.id);
+        } else {
+          // Fallback to using trackingCode as source_code (backward compatibility)
+          source = trackingCode;
+          console.log('Placement not found by either public_code or source_code, using trackingCode as source:', source);
+        }
+      }
+    }
+    const normalizedSource = source ? source.toLowerCase().trim() : 'direct';
+    
+    console.log('Final source for click recording:', normalizedSource, 'original source:', source);
     
     console.log('Click tracking attempt:', { linkId: link.id, source: normalizedSource });
     

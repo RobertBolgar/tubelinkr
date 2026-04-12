@@ -59,9 +59,22 @@ export async function onRequest(context) {
         source = placement.source_code;
         console.log('Found placement by public_code, using source_code:', source, 'from placement_id:', placement.id);
       } else {
-        // Fallback to using trackingCode as source_code (backward compatibility)
-        source = trackingCode;
-        console.log('Placement not found by public_code, using trackingCode as source:', source);
+        // Try looking up by source_code for backward compatibility
+        console.log('Placement not found by public_code, trying source_code lookup');
+        const placementBySourceCode = await env.DB.prepare(
+          'SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND source_code = ?'
+        ).bind(link.id, trackingCode).first();
+        
+        console.log('Placement lookup by source_code result:', placementBySourceCode);
+        
+        if (placementBySourceCode) {
+          source = placementBySourceCode.source_code;
+          console.log('Found placement by source_code, using source_code:', source, 'from placement_id:', placementBySourceCode.id);
+        } else {
+          // Fallback to using trackingCode as source_code (backward compatibility)
+          source = trackingCode;
+          console.log('Placement not found by either public_code or source_code, using trackingCode as source:', source);
+        }
       }
     }
     const normalizedSource = source ? source.toLowerCase().trim() : 'direct';

@@ -5,7 +5,7 @@ import { db, Link as LinkType } from '../lib/cloudflare';
 import { Layout } from '../components/Layout';
 import { LinkCard } from '../components/LinkCard';
 import { AddPlacementModal } from '../components/AddPlacementModal';
-import { Plus } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 
 type LinkWithClicks = LinkType & {
   clicks: number;
@@ -17,9 +17,44 @@ export function LinksPage() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchLinks();
+  }, [user]);
+
+  // Auto-refresh every 15 seconds
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(() => {
+      fetchLinks();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+  // Refetch when tab becomes visible or gains focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        fetchLinks();
+      }
+    };
+
+    const handleFocus = () => {
+      if (user) {
+        fetchLinks();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [user]);
 
   const fetchLinks = async () => {
@@ -56,7 +91,13 @@ export function LinksPage() {
       console.error('Error fetching links:', error);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
+  };
+
+  const handleManualRefresh = () => {
+    setIsRefreshing(true);
+    fetchLinks();
   };
 
   const toggleLinkStatus = async (linkId: string, currentStatus: boolean) => {
@@ -116,13 +157,24 @@ export function LinksPage() {
             <h1 className="text-2xl sm:text-3xl font-bold text-white">Your Links</h1>
             <p className="text-gray-400 mt-2">{links.length} total links</p>
           </div>
-          <Link
-            to="/links/new"
-            className="flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors whitespace-nowrap"
-          >
-            <Plus className="w-5 h-5" />
-            New Link
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Refresh stats"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh stats'}
+            </button>
+            <Link
+              to="/links/new"
+              className="flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors whitespace-nowrap"
+            >
+              <Plus className="w-5 h-5" />
+              New Link
+            </Link>
+          </div>
         </div>
 
         {links.length > 0 ? (

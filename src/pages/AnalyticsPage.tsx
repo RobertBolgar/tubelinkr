@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { db } from '../lib/cloudflare';
 import { formatSourceLabel } from '../lib/utils';
 import { Layout } from '../components/Layout';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, RefreshCw } from 'lucide-react';
 
 type LinkStats = {
   id: string;
@@ -35,9 +35,44 @@ export function AnalyticsPage() {
   const [last24hClicks, setLast24hClicks] = useState(0);
   const [placementMap, setPlacementMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchAnalytics();
+  }, [user]);
+
+  // Auto-refresh every 15 seconds
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(() => {
+      fetchAnalytics();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+  // Refetch when tab becomes visible or gains focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        fetchAnalytics();
+      }
+    };
+
+    const handleFocus = () => {
+      if (user) {
+        fetchAnalytics();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [user]);
 
   const fetchAnalytics = async () => {
@@ -129,7 +164,13 @@ export function AnalyticsPage() {
       console.error('Error fetching analytics:', error);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
+  };
+
+  const handleManualRefresh = () => {
+    setIsRefreshing(true);
+    fetchAnalytics();
   };
 
   const getBestSource = (sourceData: SourceStats[]) => {
@@ -164,9 +205,20 @@ export function AnalyticsPage() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 overflow-x-hidden">
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Analytics</h1>
-          <p className="text-gray-400 mt-2">Track your link performance</p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Analytics</h1>
+            <p className="text-gray-400 mt-2">Track your link performance</p>
+          </div>
+          <button
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Refresh stats"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh stats'}
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { AddPlacementModal } from '../components/AddPlacementModal';
-import { Copy, CheckCircle2, Plus, ArrowLeft, Trash2 } from 'lucide-react';
+import { Copy, CheckCircle2, Plus, ArrowLeft, Trash2, RefreshCw } from 'lucide-react';
 
 const PUBLIC_BASE_URL = 'https://go.tubelinkr.com';
 
@@ -32,12 +32,47 @@ export function PlacementsPage() {
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     if (linkId) {
       fetchPlacements();
       fetchLinkInfo();
     }
+  }, [linkId]);
+
+  // Auto-refresh every 15 seconds
+  useEffect(() => {
+    if (!linkId) return;
+
+    const interval = setInterval(() => {
+      fetchPlacements();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [linkId]);
+
+  // Refetch when tab becomes visible or gains focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && linkId) {
+        fetchPlacements();
+      }
+    };
+
+    const handleFocus = () => {
+      if (linkId) {
+        fetchPlacements();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [linkId]);
 
   const fetchPlacements = async () => {
@@ -51,7 +86,13 @@ export function PlacementsPage() {
       console.error('Error fetching placements:', error);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
+  };
+
+  const handleManualRefresh = () => {
+    setIsRefreshing(true);
+    fetchPlacements();
   };
 
   const fetchLinkInfo = async () => {
@@ -151,7 +192,16 @@ export function PlacementsPage() {
           <p className="text-gray-400">{placements.length} placements tracked</p>
         </div>
 
-        <div className="mb-6 flex justify-end">
+        <div className="mb-6 flex flex-col sm:flex-row justify-between gap-4">
+          <button
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Refresh stats"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh stats'}
+          </button>
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"

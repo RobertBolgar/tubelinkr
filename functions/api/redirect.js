@@ -31,8 +31,19 @@ export async function onRequest(context) {
     // Get source from query parameter (backward compatibility) or path-based tracking code
     let source = url.searchParams.get('source');
     if (trackingCode) {
-      // Use path-based tracking code as source
-      source = trackingCode;
+      // Check if trackingCode is a public_code (new format) or source_code (old format)
+      const placement = await env.DB.prepare(
+        'SELECT source_code FROM placements WHERE link_id = ? AND public_code = ?'
+      ).bind(link.id, trackingCode).first();
+      
+      if (placement) {
+        // Use the source_code from the placement for tracking
+        source = placement.source_code;
+        console.log('Found placement by public_code, using source_code:', source);
+      } else {
+        // Fallback to using trackingCode as source_code (backward compatibility)
+        source = trackingCode;
+      }
     }
     const normalizedSource = source ? source.toLowerCase().trim() : 'direct';
     

@@ -12,6 +12,7 @@ type Placement = {
   name: string;
   type: string;
   source_code: string;
+  public_code: string;
   created_at: string;
   updated_at: string;
   clicks: number;
@@ -146,7 +147,7 @@ export function PlacementsPage() {
   };
 
   const copyPlacementUrl = (placement: Placement) => {
-    const url = `${PUBLIC_BASE_URL}/${linkInfo?.username}/${linkInfo?.slug}/${placement.source_code}`;
+    const url = `${PUBLIC_BASE_URL}/${linkInfo?.username}/${linkInfo?.slug}/${placement.public_code}`;
     navigator.clipboard.writeText(url);
     setCopiedId(placement.id);
     setTimeout(() => setCopiedId(null), 2000);

@@ -14,7 +14,7 @@ export async function onRequest(context) {
     
     try {
       const result = await env.DB.prepare(
-        `SELECT id, link_id, name, type, source_code, created_at, updated_at 
+        `SELECT id, link_id, name, type, source_code, public_code, created_at, updated_at 
          FROM placements WHERE link_id = ? ORDER BY created_at DESC`
       ).bind(linkId).all();
       
@@ -48,6 +48,7 @@ export async function onRequest(context) {
           name: 'Direct',
           type: 'direct',
           source_code: 'direct',
+          public_code: 'direct',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           clicks: directClickCount.count
@@ -99,11 +100,46 @@ export async function onRequest(context) {
         });
       }
       
+      // Generate public_code based on type and name
+      let public_code;
+      if (type === 'description') {
+        public_code = 'description';
+      } else if (type === 'pinned') {
+        public_code = 'pinned';
+      } else if (type === 'bio') {
+        public_code = 'bio';
+      } else if (type === 'short') {
+        public_code = 'short';
+      } else if (type === 'video') {
+        public_code = 'video';
+      } else {
+        // Generate slug from name for custom/other placements
+        public_code = name.toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+      }
+      
+      // Ensure public_code is unique for this link, append suffix if needed
+      let final_public_code = public_code;
+      let suffix = 1;
+      while (true) {
+        const existingPublicCode = await env.DB.prepare(
+          'SELECT id FROM placements WHERE link_id = ? AND public_code = ?'
+        ).bind(link_id, final_public_code).first();
+        
+        if (!existingPublicCode) break;
+        
+        suffix++;
+        final_public_code = `${public_code}-${suffix}`;
+      }
+      
       // Create placement
       const result = await env.DB.prepare(
-        `INSERT INTO placements (link_id, name, type, source_code, created_at, updated_at) 
-         VALUES (?, ?, ?, ?, ?, ?)`
-      ).bind(link_id, name, type, source_code, now, now).run();
+        `INSERT INTO placements (link_id, name, type, source_code, public_code, created_at, updated_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
+      ).bind(link_id, name, type, source_code, final_public_code, now, now).run();
       
       // Update link placement_count
       await env.DB.prepare(
@@ -116,6 +152,7 @@ export async function onRequest(context) {
         name,
         type,
         source_code,
+        public_code: final_public_code,
         created_at: now,
         updated_at: now,
         clicks: 0

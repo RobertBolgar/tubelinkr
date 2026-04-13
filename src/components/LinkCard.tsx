@@ -120,7 +120,7 @@ export function LinkCard({ link, username, onToggleStatus, onAddPlacement, onVie
             className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
           >
             <List className="w-4 h-4" />
-            View performance
+            Get Links
           </button>
           <Link
             to={`/links/${link.id}/edit`}

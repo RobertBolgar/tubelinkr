@@ -240,9 +240,6 @@ export function PlacementsPage() {
                       Clicks
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Tracking code
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -258,9 +255,6 @@ export function PlacementsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-white">{placement.clicks}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-400 font-mono">{placement.source_code}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {placement.type === 'direct' ? (

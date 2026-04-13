@@ -88,7 +88,6 @@ export default {
         console.log('Query: SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND public_code = ?');
         console.log('Parameters:', link.id, public_code);
         
-        // Check if public_code is a public_code (new format) or source_code (old format)
         const placement = await env.DB.prepare(
           'SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND public_code = ?'
         ).bind(link.id, public_code).first();
@@ -104,30 +103,7 @@ export default {
           console.log('Placement source_code:', source);
           console.log('Placement public_code:', placement.public_code);
         } else {
-          // Try looking up by source_code for backward compatibility
-          console.log('--- Fallback: Lookup by source_code ---');
-          console.log('Query: SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND source_code = ?');
-          console.log('Parameters:', link.id, public_code);
-          
-          const placementBySourceCode = await env.DB.prepare(
-            'SELECT id, source_code, public_code FROM placements WHERE link_id = ? AND source_code = ?'
-          ).bind(link.id, public_code).first();
-          
-          console.log('Placement lookup by source_code result:', placementBySourceCode);
-          console.log('Placement found by source_code:', !!placementBySourceCode);
-          
-          if (placementBySourceCode) {
-            source = placementBySourceCode.source_code;
-            console.log('SUCCESS: Found placement by source_code');
-            console.log('Placement ID:', placementBySourceCode.id);
-            console.log('Placement source_code:', source);
-            console.log('Placement public_code:', placementBySourceCode.public_code);
-          } else {
-            // Fallback to using public_code as source_code (backward compatibility)
-            source = public_code;
-            console.log('WARNING: Placement not found by either public_code or source_code');
-            console.log('Using public_code as source:', source);
-          }
+          console.log('WARNING: Placement not found by public_code, will use direct');
         }
       } else {
         console.log('No public_code in path, will use query parameter or direct');

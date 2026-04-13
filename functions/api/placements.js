@@ -103,15 +103,15 @@ export async function onRequest(context) {
       // Generate public_code based on type and name
       let public_code;
       if (type === 'description') {
-        public_code = 'description';
+        public_code = 'd';
       } else if (type === 'pinned') {
-        public_code = 'pinned';
+        public_code = 'p';
       } else if (type === 'bio') {
-        public_code = 'bio';
+        public_code = 'b';
       } else if (type === 'short') {
-        public_code = 'short';
+        public_code = 's';
       } else if (type === 'video') {
-        public_code = 'video';
+        public_code = 'v';
       } else {
         // Generate slug from name for custom/other placements
         public_code = name.toLowerCase()
